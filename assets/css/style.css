@@ -2122,8 +2122,9 @@ main { animation: vt-page-in 0.8s var(--ease-out) backwards; }
 .nav-more.open .more-btn .chev { transform: rotate(180deg); }
 
 .nav-more-menu {
-  position: absolute; top: calc(100% + 12px); right: 0; z-index: 90;
-  min-width: 216px; padding: 8px; border-radius: 20px;
+  position: fixed; top: 0; left: 0; z-index: 95;
+  min-width: 216px; max-height: calc(100vh - 96px); overflow-y: auto;
+  padding: 8px; border-radius: 20px;
   background: linear-gradient(150deg, var(--glass-a), var(--glass-b));
   -webkit-backdrop-filter: blur(24px) saturate(1.7);
   backdrop-filter: blur(24px) saturate(1.7);
@@ -2133,7 +2134,7 @@ main { animation: vt-page-in 0.8s var(--ease-out) backwards; }
   transform-origin: top right;
   transition: opacity .22s var(--ease-out), transform .22s var(--ease-out), visibility .22s;
 }
-.nav-more.open .nav-more-menu { opacity: 1; visibility: visible; transform: none; }
+.nav-more-menu.open { opacity: 1; visibility: visible; transform: none; }
 .nav-more-menu a {
   display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
   padding: 9px 12px; border-radius: 12px;
@@ -2231,12 +2232,12 @@ main { animation: vt-page-in 0.8s var(--ease-out) backwards; }
   position: absolute; left: -5px; top: 24px;
   width: 9px; height: 9px; border-radius: 50%;
   background: var(--c);
-  box-shadow: 0 0 0 4px rgba(8, 12, 26, .9), 0 0 14px var(--c);
+  box-shadow: 0 0 0 4px var(--bg), 0 0 14px var(--c);
 }
 .arc-row {
   display: flex; align-items: baseline; gap: 16px;
   padding: 15px 4px;
-  border-bottom: 1px dashed rgba(255, 255, 255, .07);
+  border-bottom: 1px dashed var(--glass-border);
 }
 .arc-date { flex: none; width: 54px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-faint); }
 .arc-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
@@ -2464,7 +2465,6 @@ main { animation: vt-page-in 0.8s var(--ease-out) backwards; }
 @media (max-width: 720px) {
   .more-btn { gap: 4px; padding: 8px 7px; font-size: 12.5px; }
   .more-btn > svg:first-child { width: 14px; height: 14px; }
-  .nav-more-menu { right: -70px; min-width: 190px; }
   .palette { padding-top: 8vh; }
   .palette-foot { gap: 10px; }
   .arc-side { display: none; }

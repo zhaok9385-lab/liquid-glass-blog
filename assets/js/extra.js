@@ -55,16 +55,37 @@ window.LG = window.LG || {};
 
       const btn = wrap.querySelector('.more-btn');
       const menu = wrap.querySelector('.nav-more-menu');
-      const close = () => { wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+      // 移出顶栏：移动端顶栏 overflow-x:auto 会裁切下拉菜单
+      document.body.appendChild(menu);
+      const close = () => {
+        wrap.classList.remove('open');
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      };
+      const place = () => {
+        const r = btn.getBoundingClientRect();
+        const mw = menu.offsetWidth || 216;
+        const left = Math.max(12, Math.min(r.right - mw, window.innerWidth - mw - 12));
+        menu.style.top = Math.round(r.bottom + 10) + 'px';
+        menu.style.left = Math.round(left) + 'px';
+      };
+      const openMenu = () => {
+        wrap.classList.add('open');
+        menu.classList.add('open');
+        place();
+        btn.setAttribute('aria-expanded', 'true');
+      };
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const open = !wrap.classList.contains('open');
-        wrap.classList.toggle('open', open);
-        btn.setAttribute('aria-expanded', String(open));
+        if (wrap.classList.contains('open')) close(); else openMenu();
       });
-      document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+      document.addEventListener('click', (e) => {
+        if (!wrap.contains(e.target) && !menu.contains(e.target)) close();
+      });
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
       menu.addEventListener('click', (e) => { if (e.target.closest('a')) close(); });
+      window.addEventListener('scroll', close, { passive: true });
+      window.addEventListener('resize', close);
       if (window.LG.updateActiveNav) window.LG.updateActiveNav();
     }
 
