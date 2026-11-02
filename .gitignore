@@ -1,0 +1,9 @@
+# 站点运行时产物与临时文件
+repair/
+*.log
+
+# 本地个人配置
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

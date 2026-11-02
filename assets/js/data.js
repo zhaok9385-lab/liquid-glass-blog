@@ -1,0 +1,209 @@
+/* ============================================================
+   液态玻璃博客 · 数据层
+   站点所有文章与元信息都定义在这里，改这里即可换内容。
+   ============================================================ */
+
+const SITE = {
+  name: 'Tom',
+  en: 'Tom',
+  handle: '@tom.gl',
+  motto: '以玻璃，折射思想',
+  start: '2026-05-01',          // 建站日期，用于统计
+  email: 'hello@tom.gl',
+  github: 'https://github.com/',
+  rss: '#',
+};
+
+const TAGS = {
+  webgl:  { label: 'WebGL',  color: '#7cc4e8' },
+  css:    { label: 'CSS',    color: '#a19ae4' },
+  design: { label: '设计',    color: '#d49ec2' },
+  js:     { label: 'JavaScript', color: '#d9bd85' },
+  note:   { label: '随笔',    color: '#8fc7ab' },
+};
+
+const POSTS = [
+  {
+    id: 'aurora-glsl',
+    title: '用 30 行 GLSL，画出会呼吸的极光',
+    date: '2026-10-20',
+    minutes: 7,
+    tags: ['webgl', 'css'],
+    accent: '#7cc4e8',
+    excerpt: '域扭曲（Domain Warping）是着色器世界里最温柔的魔法：让噪声去扭曲噪声，光就有了呼吸。',
+    content: [
+      '<h2 id="s1">为什么是着色器</h2>',
+      '<p>很多博客的背景是一张静态图，或者一个循环播放的视频。它们都很好，但都缺一点东西——<strong>回应</strong>。着色器（Shader）不一样，它每一帧都重新计算，鼠标、滚动、时间都可以成为它的输入。于是背景不再是背景，而是一块会回应你的、活着的玻璃。</p>',
+      '<p>这篇笔记记录我这个博客头图极光的完整推导过程。最终代码不到 30 行 GLSL，没有任何贴图，跑在现代手机上也几乎不掉帧。</p>',
+      '<h2 id="s2">从噪声开始</h2>',
+      '<p>一切自然质感的前提是一支好的噪声函数。经典的 value noise 加上<strong>层次衰减</strong>，就是我们常说的 fBm（分形布朗运动）：</p>',
+      '<pre><code>float hash(vec2 p) {\n  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);\n}\n\nfloat noise(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(\n    mix(hash(i), hash(i + vec2(1, 0)), u.x),\n    mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);\n}\n\nfloat fbm(vec2 p) {\n  float v = 0.0, a = 0.5;\n  mat2 m = mat2(1.6, 1.2, -1.2, 1.6);   // 旋转 + 拉伸\n  for (int i = 0; i &lt; 5; i++) {\n    v += a * noise(p);\n    p = m * p;\n    a *= 0.5;                           // 每层振幅减半\n  }\n  return v;\n}</code></pre>',
+      '<p>fbm 单独使用只是烟雾。它像一块没有形状的大理石，等着被雕刻。</p>',
+      '<h2 id="s3">让噪声流动：域扭曲</h2>',
+      '<p>雕刻的手法叫<strong>域扭曲</strong>：把 fbm 的输出当作坐标的偏移量，再喂回 fbm 自己。一层不够就两层——噪声扭曲噪声，再被扭曲过的噪声继续扭曲。</p>',
+      '<pre><code>vec2 q = vec2(fbm(uv + t),        fbm(uv + vec2(5.2, 1.3) - t));\nvec2 r = vec2(fbm(uv + 2.2*q + vec2(1.7, 9.2)),\n              fbm(uv + 2.2*q + vec2(8.3, 2.8)));\nfloat f = fbm(uv + 2.5 * r);</code></pre>',
+      '<p>变量 <code>f</code> 现在携带了三层嵌套的湍流结构。把它映射到颜色上，你会得到像绸缎一样缠绕、缓慢流动的光带——这就是极光的骨架。</p>',
+      '<blockquote>着色器不是绘图，是雕刻光。你不决定每一像素是什么颜色，你只规定光按照什么规则流动。</blockquote>',
+      '<h2 id="s4">调色的艺术</h2>',
+      '<p>极光最忌讳的是颜色太多。我的配方只有三笔：</p>',
+      '<ul>',
+      '<li><strong>底色</strong>：接近纯黑的深蓝 #070814，负责把画面压住；</li>',
+      '<li><strong>主体</strong>：一个冷紫到青色的插值，跟随 <code>f</code> 的强度流动；</li>',
+      '<li><strong>点缀</strong>：一点点品红，只出现在扭曲最强的地方，作为视觉的「锐角」。</li>',
+      '</ul>',
+      '<p>最后用 <code>smoothstep</code> 做柔和的遮罩，再加一层随时间闪烁的细颗粒（grain），玻璃的质感就出来了。鼠标位置注入一个衰减的辉光，光会向你的指尖聚拢——这是整个背景里我最喜欢的一个细节。</p>',
+      '<h2 id="s5">性能与降级</h2>',
+      '<p>三个工程上的决定让它能安全上线：把渲染分辨率压到物理像素的 0.75 倍再由 CSS 放大；<code>document.hidden</code> 时暂停 requestAnimationFrame；WebGL 不可用时回退到一层静态 CSS 渐变。着色器再美，也只是页面的一层皮肤，它必须谦让内容。</p>',
+      '<p>完整源码就在这个页面的背后，右键查看即可。愿你也能用 30 行代码，养出一片自己的极光。</p>'
+    ].join(''),
+  },
+  {
+    id: 'liquid-glass-css',
+    title: '液态玻璃 UI：从 Apple 的新语言到 CSS 落地',
+    date: '2026-09-12',
+    minutes: 6,
+    tags: ['design', 'css'],
+    accent: '#a19ae4',
+    excerpt: '折射、高光、景深——拆解液态玻璃的三个关键成分，并给出一套可以直接抄走的 CSS 配方。',
+    content: [
+      '<h2 id="s1">什么是液态玻璃</h2>',
+      '<p>当 Apple 把系统界面全面转向 Liquid Glass 时，很多设计师的第一反应是「毛玻璃回来了」。但液态玻璃和十年前的磨砂玻璃（frosted glass）是两种东西：磨砂玻璃是<strong>静态的遮挡</strong>，液态玻璃是<strong>有体积的光学元件</strong>——它折射、反光、有厚度，像一个真正的透镜浮在内容之上。</p>',
+      '<h2 id="s2">三个关键成分</h2>',
+      '<p>拆开任何一块好看的液态玻璃，里面都有三样东西：</p>',
+      '<ul>',
+      '<li><strong>折射（Refraction）</strong>：边缘的像素被轻微位移和放大，背景在玻璃的「厚度」里发生了弯曲；</li>',
+      '<li><strong>高光（Specular）</strong>：上边缘一条 1px 的亮线，下边缘一条更暗的反射，模拟光源来自上方；</li>',
+      '<li><strong>景深（Depth）</strong>：玻璃后面的内容被模糊和增饱和，暗示它和玻璃不在同一个焦平面上。</li>',
+      '</ul>',
+      '<h2 id="s3">用 CSS 复刻：基础配方</h2>',
+      '<p>三行核心声明就能得到 80% 的质感，剩下的 20% 靠内阴影的耐心堆叠：</p>',
+      '<pre><code>.glass {\n  background: linear-gradient(135deg,\n    rgba(255,255,255,.10),\n    rgba(255,255,255,.04) 40%,\n    rgba(255,255,255,.08));\n  backdrop-filter: blur(22px) saturate(1.7);\n  border: 1px solid rgba(255,255,255,.14);\n  box-shadow:\n    0 8px 32px rgba(3, 6, 20, .35),      /* 投影：体积 */\n    inset 0  1px 0 rgba(255,255,255,.35), /* 顶部高光 */\n    inset 0 -1px 0 rgba(255,255,255,.08), /* 底部反射 */\n    inset 1px 0 0 rgba(255,255,255,.10),  /* 侧壁 */\n    inset -1px 0 0 rgba(255,255,255,.10);\n}</code></pre>',
+      '<p>记住两个比例：<code>blur</code> 半径通常是圆角半径的三分之一；<code>saturate</code> 提到 1.6 以上，玻璃才有「湿润感」，否则会像蒙了一层灰。</p>',
+      '<h2 id="s4">SVG 位移贴图：真正的「折射」</h2>',
+      '<p><code>backdrop-filter</code> 的模糊只是景深。要做出弯曲，需要把一块噪声图作为位移贴图（displacement map），让背后的像素发生错位：</p>',
+      '<pre><code>&lt;filter id="lens"&gt;\n  &lt;feTurbulence type="fractalNoise"\n    baseFrequency="0.009" numOctaves="2" result="n"/&gt;\n  &lt;feGaussianBlur in="n" stdDeviation="2" result="soft"/&gt;\n  &lt;feDisplacementMap in="SourceGraphic" in2="soft"\n    scale="42" xChannelSelector="R" yChannelSelector="G"/&gt;\n&lt;/filter&gt;\n\n/* Chromium 支持 SVG 滤镜参与 backdrop-filter */\n.lens { backdrop-filter: url(#lens) blur(2px) saturate(1.5); }</code></pre>',
+      '<p>把这块滤镜放在一个圆形元素上，叠在标题的边缘，你就得到了一个会「融化」背景的液态透镜。Firefox 和 Safari 目前不支持这个组合，需要优雅降级为普通模糊——本站就是这么做的。</p>',
+      '<h2 id="s5">克制：什么时候不要用玻璃</h2>',
+      '<blockquote>玻璃是光学元件，不是墙纸。一块界面上超过三块玻璃，光就无处落脚了。</blockquote>',
+      '<p>我的守则是：玻璃只给<strong>悬浮层</strong>（导航、卡片、光标），正文永远落在实底上；玻璃之下必须有足够丰富的色彩供它折射——一片纯白的背景上放玻璃，只会得到一片灰。这也是为什么这个博客先把极光铺满，再谈玻璃。</p>'
+    ].join(''),
+  },
+  {
+    id: 'jelly-blog',
+    title: '我把博客做成了「果冻」：一次前端实验记录',
+    date: '2026-08-30',
+    minutes: 8,
+    tags: ['js', 'css', 'design'],
+    accent: '#d49ec2',
+    excerpt: '自定义光标、磁吸按钮、倾斜卡片、着色器背景——把所有交互堆在一起会发生什么？一份踩坑实录。',
+    content: [
+      '<h2 id="s1">动机</h2>',
+      '<p>一直觉得个人博客最迷人的地方不是文章，而是它允许你<strong>任性</strong>。公司项目里永远轮不到你用自定义光标，那就在自己的地盘上把它做绝。这篇是这个博客 construction 过程的流水账，包括所有我踩过的坑。</p>',
+      '<h2 id="s2">技术清单</h2>',
+      '<ul>',
+      '<li><strong>WebGL 极光背景</strong>：域扭曲 fBm，见上一篇；</li>',
+      '<li><strong>自定义光标</strong>：一个实心小点 + 一枚玻璃圆环，圆环用弹簧插值跟随；</li>',
+      '<li><strong>磁吸按钮</strong>：指针进入感应区后，按钮向指针平移 20% 距离，离开后弹回；</li>',
+      '<li><strong>倾斜卡片</strong>：rotateX / rotateY 跟随指针，同时把指针坐标写进 CSS 变量驱动一道扫光；</li>',
+      '<li><strong>滚动揭示</strong>：IntersectionObserver 一次性触发，模糊 + 位移 + 缩放入场。</li>',
+      '</ul>',
+      '<p>所有动效共用一个 rAF 循环和一个 lerp 工具函数——这是让它们「手感一致」的关键。</p>',
+      '<h2 id="s3">踩过的坑</h2>',
+      '<p><strong>backdrop-filter 不能嵌套。</strong>玻璃光标悬停在玻璃卡片上时，Chromium 会把内层模糊直接丢掉，两层玻璃叠出诡异的硬边。解法是让光标在悬停卡片时切换成描边样式，避免两层模糊相撞。</p>',
+      '<p><strong>每帧写 CSS 变量比直接改 style 快得多。</strong>倾斜卡片最初每帧更新 transform 字符串，主线程压力明显；改成只更新 <code>--rx</code>、<code>--ry</code>、<code>--mx</code> 三个变量、计算放在 CSS 侧后，长列表滚动时的掉帧消失了。</p>',
+      '<p><strong>Safari 对大半径 backdrop-filter 非常敏感。</strong>全屏玻璃层会把合成器的预算吃光。凡是全屏级的元素，我只敢给 12px 以下的模糊，剩下的靠背景本身的色彩层次去补。</p>',
+      '<blockquote>动效的最高标准不是「炫」，而是让指针与像素之间的因果链条变得可以触摸。</blockquote>',
+      '<h2 id="s4">数据说话</h2>',
+      '<p>最终整个站点没有框架、没有构建、没有第三方运行时：CSS 约 30KB，JS 约 15KB，图片零张（所有视觉都是代码画的）。桌面端 Chrome 稳定 120fps，五年前的安卓机也能跑满 60fps——前提是尊重上面那三条坑。</p>',
+      '<h2 id="s5">结语</h2>',
+      '<p>果冻也好，玻璃也好，本质上都是在追问同一个问题：界面能不能有<strong>物理直觉</strong>？当一个按钮像有质量一样被推动、一枚光标像水滴一样归位，人机之间的距离好像真的近了一点点。这个实验会继续，下一篇打算把 View Transitions 也搬进来。</p>'
+    ].join(''),
+  },
+  {
+    id: 'view-transitions',
+    title: 'View Transitions API：让页面切换像水一样',
+    date: '2026-07-04',
+    minutes: 5,
+    tags: ['js', 'css'],
+    accent: '#d9bd85',
+    excerpt: '过去要靠 FLIP 手搓的转场，现在浏览器原生接管。一份从 SPA 到 MPA 的完整实践指南。',
+    content: [
+      '<h2 id="s1">旧的切换方式</h2>',
+      '<p>页面切换动画曾经是一门手艺：记录旧位置，更新 DOM，计算新位置，用 transform 反向播一遍——FLIP 技术名不虚传，但也足够繁琐。更糟的是每个团队手搓的 FLIP 手感都不一样，转场成了项目的孤岛。</p>',
+      '<p>View Transitions API 把这件事变成了浏览器原语：你告诉它「这两个元素是同一个东西」，剩下的插值、合成、中断处理全部由浏览器完成。</p>',
+      '<h2 id="s2">SPA：一行代码的魔法</h2>',
+      '<pre><code>function goTo(page) {\n  if (!document.startViewTransition) {\n    location.hash = page;               // 优雅降级\n    return;\n  }\n  document.startViewTransition(() =&gt; {\n    render(page);                       // 同步更新 DOM\n  });\n}</code></pre>',
+      '<p>浏览器会自动截取切换前后的快照，默认做一个干净的交叉淡入淡出。想精细控制，就给元素起名字：</p>',
+      '<pre><code>.hero-image  { view-transition-name: hero; }\n.post-card   { view-transition-name: card; }\n\n::view-transition-old(hero),\n::view-transition-new(hero) {\n  animation-duration: .45s;\n  animation-timing-function: cubic-bezier(.22, 1, .36, 1);\n}</code></pre>',
+      '<p>列表页的卡片和详情页的头图共用一个 <code>view-transition-name</code>，浏览器就会把前者「变形」成后者——这就是共享元素转场，一行 CSS 的事。</p>',
+      '<h2 id="s3">MPA：跨文档也能接力</h2>',
+      '<p>更让我兴奋的是跨文档版本。两个独立页面之间，只要加上一行：</p>',
+      '<pre><code>&lt;meta name="view-transition" content="same-origin"&gt;</code></pre>',
+      '<p>同源的导航就会自动获得快照转场。传统多页博客第一次有机会拥有 SPA 级别的连续感，而且零 JS。这个博客的暗色模式切换就用了它：以主题按钮为圆心做一圈 <code>clip-path</code> 扩散，新主题像水波一样漫过整页。</p>',
+      '<h2 id="s4">支持与降级</h2>',
+      '<ul>',
+      '<li>Chromium 系已经稳定支持单文档转场，跨文档也已可用；</li>',
+      '<li>Firefox 与 Safari 正在跟进，不支持时 <code>startViewTransition</code> 不存在，按上面的写法自然降级为瞬时切换；</li>',
+      '<li><code>prefers-reduced-motion</code> 用户应当直接跳过动画，这是转场的礼仪。</li>',
+      '</ul>',
+      '<h2 id="s5">展望</h2>',
+      '<p>当转场成为平台原语，页面的边界感会进一步消失，「网站」和「应用」的体验差距又缩小了一格。下一次重构博客，我打算让列表 → 详情的卡片转场真的流动起来——像水一样。</p>'
+    ].join(''),
+  },
+  {
+    id: 'glow-dark-theme',
+    title: '设计一套会发光的暗色主题',
+    date: '2026-05-21',
+    minutes: 5,
+    tags: ['design', 'css'],
+    accent: '#8fc7ab',
+    excerpt: '暗色不是把白色反转。从层级、强调色到对比度，一份关于「如何在黑暗中安放光」的设计笔记。',
+    content: [
+      '<h2 id="s1">暗色不是黑色</h2>',
+      '<p>新手做暗色主题最常见的做法是把 <code>#fff</code> 全局替换成 <code>#000</code>。得到的界面像深夜熄灯的机房：死黑、没有空气感。真正舒服的暗色底应该带一点色相——这个博客用的是 <code>#05060f</code>，一个往蓝紫偏了半度的近黑。别小看这半度，它决定了整个空间是「墓穴」还是「深夜的天文台」。</p>',
+      '<h2 id="s2">层级与玻璃</h2>',
+      '<p>亮色主题里，层级靠投影表达；暗色主题里，投影是无效的——黑暗中没有影子。取而代之的有两种手段：</p>',
+      '<ul>',
+      '<li><strong>抬高亮度</strong>：层级越高的表面，底色越亮一点点，模拟被环境光照到的感觉；</li>',
+      '<li><strong>边缘光</strong>：给浮起的面一条 1px 的亮边（<code>inset 0 1px 0</code>），像玻璃器皿的轮廓被逆光勾出来。</li>',
+      '</ul>',
+      '<p>液态玻璃天然适合暗色主题：模糊 + 增饱和本身就在「聚拢」背后的光，让暗界面拥有内部的光源感。</p>',
+      '<h2 id="s3">强调色的克制</h2>',
+      '<p>暗底上任何颜色都会比亮底上显得更亮，所以强调色的饱和度要整体下调一档，改用<strong>面积</strong>来控制视觉权重。我的规则：一种强调色只允许出现在一件事上——链接是链接色，选中是选中色，永远不混用。整个站点真正常亮的只有三支：青、紫、品红，其余颜色都从这三支里降低透明度派生。</p>',
+      '<h2 id="s4">对比度与无障碍</h2>',
+      '<p>发光的前提是可读。几条硬指标：</p>',
+      '<ul>',
+      '<li>正文对比度不低于 WCAG AA 的 4.5:1——纯白太刺眼，我用 <code>#eef1ff</code>，次级文字则压到 60% 透明度；</li>',
+      '<li>发光文字（text-shadow 型霓虹）只允许出现在装饰元素上，正文永远不发光；</li>',
+      '<li>所有依赖颜色传达的状态，同时用形状或图标冗余表达。</li>',
+      '</ul>',
+      '<blockquote>暗色主题的设计目标，是让人忘记自己正在看一块发光的屏幕。</blockquote>',
+      '<h2 id="s5">切换的仪式感</h2>',
+      '<p>主题切换是暗色主题的「关门动作」，值得一点仪式感：以开关为圆心的水波扩散、背景极光的色温同步渐变、玻璃高光角度的轻微旋转——三者并行 400ms，一次切换就是一场小型的日落。实现细节用到了 View Transitions API，见七月那篇文章。</p>'
+    ].join(''),
+  },
+];
+
+/* 相册静态照片（用户上传的照片另存于 localStorage，不在此处） */
+const PHOTOS = [
+  { src: 'assets/img/p1.jpg', cap: '云海之上', date: '2026 / 10' },
+  { src: 'assets/img/p2.jpg', cap: '晨雾山林', date: '2026 / 08' },
+  { src: 'assets/img/p3.jpg', cap: '林间光斑', date: '2026 / 07' },
+  { src: 'assets/img/p4.jpg', cap: '海的日落', date: '2026 / 06' },
+  { src: 'assets/img/p5.jpg', cap: '潮汐与晚霞', date: '2026 / 05' },
+  { src: 'assets/img/p6.jpg', cap: '开往黄昏', date: '2026 / 05' },
+];
+
+/* 工具函数：字数统计、日期格式化 */
+const DataUtil = {
+  plain(p) { return p.content.replace(/<[^>]+>/g, ''); },
+  wordCount(p) { return DataUtil.plain(p).replace(/\s/g, '').length; },
+  fmtDate(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+  },
+  daysSince(iso) {
+    return Math.max(1, Math.floor((Date.now() - new Date(iso + 'T00:00:00').getTime()) / 86400000));
+  },
+  tag(t) { return TAGS[t] || { label: t, color: '#9aa3c0' }; },
+};
