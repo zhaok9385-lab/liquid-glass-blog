@@ -1,0 +1,50 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "Tom · 液态玻璃博客",
+  "home_page_url": "https://tom.gl/",
+  "feed_url": "https://tom.gl/feed.json",
+  "description": "以玻璃，折射思想。WebGL、CSS 与界面动效的实验笔记。",
+  "language": "zh-CN",
+  "items": [
+    {
+      "id": "https://tom.gl/post.html?id=aurora-glsl",
+      "url": "https://tom.gl/post.html?id=aurora-glsl",
+      "title": "用 30 行 GLSL，画出会呼吸的极光",
+      "summary": "域扭曲（Domain Warping）是着色器世界里最温柔的魔法：让噪声去扭曲噪声，光就有了呼吸。",
+      "date_published": "2026-10-20T08:00:00+08:00",
+      "tags": ["WebGL", "CSS"]
+    },
+    {
+      "id": "https://tom.gl/post.html?id=liquid-glass-css",
+      "url": "https://tom.gl/post.html?id=liquid-glass-css",
+      "title": "液态玻璃 UI：从 Apple 的新语言到 CSS 落地",
+      "summary": "折射、高光、景深——拆解液态玻璃的三个关键成分，并给出一套可以直接抄走的 CSS 配方。",
+      "date_published": "2026-09-12T08:00:00+08:00",
+      "tags": ["CSS", "设计"]
+    },
+    {
+      "id": "https://tom.gl/post.html?id=jelly-blog",
+      "url": "https://tom.gl/post.html?id=jelly-blog",
+      "title": "我把博客做成了「果冻」：一次前端实验记录",
+      "summary": "自定义光标、磁吸按钮、倾斜卡片、着色器背景——把所有交互堆在一起会发生什么？一份踩坑实录。",
+      "date_published": "2026-08-30T08:00:00+08:00",
+      "tags": ["JavaScript", "设计"]
+    },
+    {
+      "id": "https://tom.gl/post.html?id=view-transitions",
+      "url": "https://tom.gl/post.html?id=view-transitions",
+      "title": "View Transitions API：让页面切换像水一样",
+      "summary": "过去要靠 FLIP 手搓的转场，现在浏览器原生接管。一份从 SPA 到 MPA 的完整实践指南。",
+      "date_published": "2026-07-04T08:00:00+08:00",
+      "tags": ["JavaScript"]
+    },
+    {
+      "id": "https://tom.gl/post.html?id=glow-dark-theme",
+      "url": "https://tom.gl/post.html?id=glow-dark-theme",
+      "title": "设计一套会发光的暗色主题",
+      "summary": "暗色不是把白色反转。从层级、强调色到对比度，一份关于「如何在黑暗中安放光」的设计笔记。",
+      "date_published": "2026-05-21T08:00:00+08:00",
+      "tags": ["设计"]
+    }
+  ]
+}

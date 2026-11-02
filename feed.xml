@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tom · 液态玻璃博客</title>
+    <link>https://tom.gl/</link>
+    <description>以玻璃，折射思想。WebGL、CSS 与界面动效的实验笔记。</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 20 Oct 2026 08:00:00 +0800</lastBuildDate>
+    <atom:link href="https://tom.gl/feed.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title>用 30 行 GLSL，画出会呼吸的极光</title>
+      <link>https://tom.gl/post.html?id=aurora-glsl</link>
+      <guid isPermaLink="true">https://tom.gl/post.html?id=aurora-glsl</guid>
+      <pubDate>Tue, 20 Oct 2026 08:00:00 +0800</pubDate>
+      <description>域扭曲（Domain Warping）是着色器世界里最温柔的魔法：让噪声去扭曲噪声，光就有了呼吸。</description>
+      <category>WebGL</category>
+      <category>CSS</category>
+    </item>
+
+    <item>
+      <title>液态玻璃 UI：从 Apple 的新语言到 CSS 落地</title>
+      <link>https://tom.gl/post.html?id=liquid-glass-css</link>
+      <guid isPermaLink="true">https://tom.gl/post.html?id=liquid-glass-css</guid>
+      <pubDate>Sat, 12 Sep 2026 08:00:00 +0800</pubDate>
+      <description>折射、高光、景深——拆解液态玻璃的三个关键成分，并给出一套可以直接抄走的 CSS 配方。</description>
+      <category>CSS</category>
+      <category>设计</category>
+    </item>
+
+    <item>
+      <title>我把博客做成了「果冻」：一次前端实验记录</title>
+      <link>https://tom.gl/post.html?id=jelly-blog</link>
+      <guid isPermaLink="true">https://tom.gl/post.html?id=jelly-blog</guid>
+      <pubDate>Sun, 30 Aug 2026 08:00:00 +0800</pubDate>
+      <description>自定义光标、磁吸按钮、倾斜卡片、着色器背景——把所有交互堆在一起会发生什么？一份踩坑实录。</description>
+      <category>JavaScript</category>
+      <category>设计</category>
+    </item>
+
+    <item>
+      <title>View Transitions API：让页面切换像水一样</title>
+      <link>https://tom.gl/post.html?id=view-transitions</link>
+      <guid isPermaLink="true">https://tom.gl/post.html?id=view-transitions</guid>
+      <pubDate>Sat, 04 Jul 2026 08:00:00 +0800</pubDate>
+      <description>过去要靠 FLIP 手搓的转场，现在浏览器原生接管。一份从 SPA 到 MPA 的完整实践指南。</description>
+      <category>JavaScript</category>
+    </item>
+
+    <item>
+      <title>设计一套会发光的暗色主题</title>
+      <link>https://tom.gl/post.html?id=glow-dark-theme</link>
+      <guid isPermaLink="true">https://tom.gl/post.html?id=glow-dark-theme</guid>
+      <pubDate>Thu, 21 May 2026 08:00:00 +0800</pubDate>
+      <description>暗色不是把白色反转。从层级、强调色到对比度，一份关于「如何在黑暗中安放光」的设计笔记。</description>
+      <category>设计</category>
+    </item>
+  </channel>
+</rss>

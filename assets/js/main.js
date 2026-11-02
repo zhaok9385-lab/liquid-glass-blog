@@ -16,6 +16,7 @@
   const escHTML = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const lsGet = (k, fb) => { try { return JSON.parse(localStorage.getItem(k)) || fb; } catch (e) { return fb; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 配额满忽略 */ } };
+  window.LG.util = { escHTML, lsGet, lsSet, REDUCED, FINE_POINTER };
 
   /* ---------- 主题 ---------- */
   const THEME_KEY = 'lg-theme';
@@ -165,6 +166,7 @@
   function updateActiveNav() {
     const links = document.querySelectorAll('.top-links a');
     const indicator = document.querySelector('.top-indicator');
+    const moreBtn = document.querySelector('.more-btn');
     const cur = pageKey(location.pathname);
     let active = null;
     links.forEach((a) => {
@@ -172,15 +174,24 @@
       try { key = pageKey(new URL(a.href, location.href).pathname); } catch (e) { }
       const on = key === cur;
       a.classList.toggle('active', on);
-      if (on) active = a;
+      if (on) { active = a; a.setAttribute('aria-current', 'page'); }
+      else a.removeAttribute('aria-current');
     });
+    // 归档 / 标签 / 笔记 / 书单 / 实验室 / 关于 统一归到「更多」下
+    if (moreBtn) {
+      const on = (moreBtn.dataset.pages || '').split(',').indexOf(cur) >= 0;
+      moreBtn.classList.toggle('active', on);
+      if (on) { active = moreBtn; moreBtn.setAttribute('aria-current', 'page'); }
+      else moreBtn.removeAttribute('aria-current');
+    }
     if (!indicator) return;
     if (!active) {
       indicator.style.opacity = '0';
       return;
     }
-    const w = active.offsetWidth;
-    const x = active.offsetLeft;
+    const w = active.getBoundingClientRect().width;
+    const navBox = document.querySelector('.top-links').getBoundingClientRect();
+    const x = active.getBoundingClientRect().left - navBox.left;
     const instant = !navCapsuleReady;
     if (instant) indicator.style.transition = 'none';
     else indicator.style.transition = '';
@@ -302,16 +313,42 @@
     const subForm = document.getElementById('sub-form');
     if (!subForm || subForm.dataset.bound) return;
     subForm.dataset.bound = '1';
-    subForm.addEventListener('submit', (e) => {
+    const endpoint = (typeof SITE !== 'undefined' && SITE.subscribeEndpoint) || '';
+    const note = document.getElementById('sub-note');
+    const email = (typeof SITE !== 'undefined' && SITE.email) || '';
+    if (!endpoint && note) {
+      note.textContent = '当前走邮件订阅 —— 提交后会打开你的邮件客户端，发送即完成。';
+    }
+    subForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const input = subForm.querySelector('input');
       const btn = subForm.querySelector('button');
       if (!input.value || input.value.indexOf('@') < 0) { input.classList.add('shake'); setTimeout(() => input.classList.remove('shake'), 500); return; }
+      if (!endpoint) {
+        const subject = encodeURIComponent('订阅更新 · ' + ((typeof SITE !== 'undefined' && SITE.name) || '博客'));
+        const body = encodeURIComponent('请把我加入更新通知列表：' + input.value);
+        window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+        if (note) note.textContent = '已为你打开邮件客户端，发送后即完成订阅。';
+        return;
+      }
       btn.disabled = true;
-      btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5 6 12l7.5-8"/></svg> 已加入列表';
-      const note = document.getElementById('sub-note');
-      if (note) note.textContent = '订阅成功 —— 更新将第一时间送达 ' + input.value;
-      input.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = '提交中…';
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ email: input.value }),
+        });
+        if (!res.ok) throw new Error(res.status);
+        btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5 6 12l7.5-8"/></svg> 已加入列表';
+        if (note) note.textContent = '订阅成功 —— 更新将第一时间送达 ' + input.value;
+        input.disabled = true;
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = original;
+        if (note) note.textContent = '提交失败，请稍后再试，或直接写邮件订阅。';
+      }
     });
   };
 
@@ -536,11 +573,12 @@
     doc.classList.remove('vt-out');
   }
   function bootFor(bodyClass) {
-    if (/post-page/.test(bodyClass)) { if (window.LG.initPost) window.LG.initPost(); return; }
-    if (/cover-page/.test(bodyClass)) { coverArmed = true; window.LG.initStats(); return; }
+    if (/post-page/.test(bodyClass)) { if (window.LG.initPost) window.LG.initPost(); if (window.LG.initExtras) window.LG.initExtras(); return; }
+    if (/cover-page/.test(bodyClass)) { coverArmed = true; window.LG.initStats(); if (window.LG.initExtras) window.LG.initExtras(); return; }
     window.LG.initIndexPage();
     window.LG.initPhotosPage();
     window.LG.initMessagesPage();
+    if (window.LG.initExtras) window.LG.initExtras();
   }
   async function spaRoute(url, push) {
     if (REDUCED) { location.href = url; return; }

@@ -85,7 +85,11 @@ window.LG.initPost = function () {
     '      </div></a>' +
     '  </aside>' +
     '</div>' +
-    '<div class="pn-grid">' + pnCard(prev, '← 上一篇') + pnCard(next, '下一篇 →') + '</div>';
+    '<div class="pn-grid">' + pnCard(prev, '← 上一篇') + pnCard(next, '下一篇 →') + '</div>' +
+    '<section class="comments glass" id="comments">' +
+    '  <h3>评论</h3>' +
+    '  <div id="giscus-mount"></div>' +
+    '</section>';
 
   /* 代码块包装：mac 窗口头 + 复制按钮 */
   root.querySelectorAll('.prose pre').forEach(function (pre) {
@@ -164,6 +168,39 @@ window.LG.initPost = function () {
       } else { done(); }
     });
   }
+
+  /* 评论：Giscus；未配置时给出去留言板的引导 */
+  (function mountComments() {
+    const box = document.getElementById('giscus-mount');
+    if (!box) return;
+    const cfg = (typeof GISCUS !== 'undefined') ? GISCUS : null;
+    if (!cfg || !cfg.repo || !cfg.repoId) {
+      box.innerHTML =
+        '<p class="comments-teaser">评论还没接通。这里预留了 Giscus 的位置 —— 在 data.js 里填上 GitHub 仓库信息即可启用；现在也可以先去 <a href="messages.html">留言板</a> 说句话。</p>' +
+        '<span class="comments-hint">Giscus · GitHub Discussions</span>';
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    const attrs = {
+      'data-repo': cfg.repo,
+      'data-repo-id': cfg.repoId,
+      'data-category': cfg.category || 'Comments',
+      'data-category-id': cfg.categoryId || '',
+      'data-mapping': cfg.mapping || 'pathname',
+      'data-strict': '1',
+      'data-reactions-enabled': '1',
+      'data-emit-metadata': '0',
+      'data-input-position': 'bottom',
+      'data-theme': document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark_dimmed' : 'light',
+      'data-lang': 'zh-CN',
+      'data-loading': 'lazy',
+    };
+    Object.keys(attrs).forEach(function (k) { s.setAttribute(k, attrs[k]); });
+    box.appendChild(s);
+  })();
 
   if (window.LG.collectTilts) window.LG.collectTilts();
 };

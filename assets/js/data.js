@@ -11,7 +11,9 @@ const SITE = {
   start: '2026-05-01',          // 建站日期，用于统计
   email: 'hello@tom.gl',
   github: 'https://github.com/',
-  rss: '#',
+  url: 'https://tom.gl',        // 部署后的站点地址，RSS / 分享链接使用
+  rss: 'feed.xml',
+  subscribeEndpoint: '',        // 填入 Buttondown / Formspree 的 POST 地址即可真实订阅；留空则回退为邮件订阅
 };
 
 const TAGS = {
@@ -194,6 +196,54 @@ const PHOTOS = [
   { src: 'assets/img/p6.jpg', cap: '开往黄昏', date: '2026 / 05' },
 ];
 
+/* 碎片笔记：短内容流，和长文章分开 */
+const NOTES = [
+  { id: 'n1', date: '2026-10-28', text: '把顶栏的当前页指示器从「底部小圆点」改成了整颗玻璃胶囊。区别很小，但指哪打哪的感觉一下子对了。', tag: 'design' },
+  { id: 'n2', date: '2026-10-12', text: 'Safari 里 backdrop-filter 叠在 transform 动画上会掉帧，把动画挪到独立图层（translateZ(0)）之后就好了。玻璃是要付代价的。', tag: 'css' },
+  { id: 'n3', date: '2026-09-30', text: '重读《Designing Data-Intensive Applications》。这次最大的收获不是具体技术，而是「一切都在权衡」这几个字。', tag: 'note' },
+  { id: 'n4', date: '2026-09-18', text: '给留言板加了一个 localStorage 版本。没有服务器，但点赞和留言都真的存在过——在你这台机器上。', tag: 'js' },
+  { id: 'n5', date: '2026-09-02', text: 'View Transitions 的默认交叉淡入太温柔了。加一层「幕布向下拉开」的遮罩之后，换页才有了空间感。', tag: 'webgl' },
+  { id: 'n6', date: '2026-08-21', text: '摄影教会我的一件事：与其装满画面，不如留出呼吸的地方。这条同样适用于界面。', tag: 'design' },
+];
+
+/* 书单 */
+const BOOKS = [
+  { id: 'b1', title: 'Designing Data-Intensive Applications', author: 'Martin Kleppmann', year: '2017', status: 'done', rating: 5, color: '#7cc4e8', note: '分布式系统的地图。每读一遍，都会发现上次漏掉的岔路。' },
+  { id: 'b2', title: 'The Design of Everyday Things', author: 'Don Norman', year: '1988', status: 'done', rating: 5, color: '#d49ec2', note: '「可供性」这个词，改变了我看所有界面的方式。' },
+  { id: 'b3', title: 'Refactoring UI', author: 'Adam Wathan & Steve Schoger', year: '2018', status: 'done', rating: 4, color: '#d9bd85', note: '不是设计理论，是一本可以随时翻的处方集。' },
+  { id: 'b4', title: 'CSS: The Definitive Guide', author: 'Eric Meyer', year: '2023', status: 'reading', rating: 0, color: '#a19ae4', note: '查漏补缺用的工具书，读到 grid 布局那一章。' },
+  { id: 'b5', title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', year: '2011', status: 'reading', rating: 0, color: '#8fc7ab', note: '慢一点读，每次读两章就够消化一周。' },
+  { id: 'b6', title: 'The Art of Doing Science and Engineering', author: 'Richard Hamming', year: '1997', status: 'wish', rating: 0, color: '#bfa8ec', note: '据说是一本会改变工作方式的讲义，先放进书单。' },
+];
+
+/* 关于：现在 / 工具 / 项目 */
+const ABOUT = {
+  now: [
+    { label: '在做', text: '重写这个小站的玻璃组件层，并把文章归档、标签、实验室陆续补上。' },
+    { label: '在学', text: 'WebGPU、渐进式图片格式，以及怎么把动效做得更「安静」。' },
+    { label: '在听', text: '坂本龙一、落日飞车，还有一些雨声和咖啡馆底噪。' },
+  ],
+  uses: [
+    { group: '硬件', items: ['MacBook Pro 14"', 'iPhone 15 Pro', '一台吃灰的胶片相机'] },
+    { group: '软件', items: ['VS Code', 'Figma', 'Obsidian', 'Arc'] },
+    { group: '技术栈', items: ['原生 HTML / CSS / JS', 'GLSL', '零构建、零依赖'] },
+  ],
+  projects: [
+    { name: 'Liquid Glass Blog', desc: '你正在看的这个站：WebGL 极光 + 液态玻璃设计系统，纯静态。', stack: ['GLSL', 'CSS', 'View Transitions'], href: 'index.html' },
+    { name: 'Glass UI Kit', desc: '一组可复用的玻璃质感组件，包含按钮、卡片、导航与参数调节器。', stack: ['CSS', 'Design Tokens'], href: 'lab.html' },
+    { name: 'Aurora Shader Notes', desc: '域扭曲极光的推导笔记，从噪声到调色的完整过程。', stack: ['GLSL', 'Math'], href: 'post.html?id=aurora-glsl' },
+  ],
+};
+
+/* 评论：填入 Giscus 配置后自动启用（https://giscus.app） */
+const GISCUS = {
+  repo: '',
+  repoId: '',
+  category: 'Comments',
+  categoryId: '',
+  mapping: 'pathname',
+};
+
 /* 工具函数：字数统计、日期格式化 */
 const DataUtil = {
   plain(p) { return p.content.replace(/<[^>]+>/g, ''); },
@@ -204,6 +254,10 @@ const DataUtil = {
   },
   daysSince(iso) {
     return Math.max(1, Math.floor((Date.now() - new Date(iso + 'T00:00:00').getTime()) / 86400000));
+  },
+  fmtShort(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return String(d.getMonth() + 1).padStart(2, '0') + ' / ' + String(d.getDate()).padStart(2, '0');
   },
   tag(t) { return TAGS[t] || { label: t, color: '#9aa3c0' }; },
 };
