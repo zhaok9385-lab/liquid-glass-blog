@@ -45,7 +45,9 @@ liquid-glass-blog/
 ├── favicon.svg
 └── assets/
     ├── css/style.css   # 液态玻璃设计系统（令牌 → 配方 → 组件）
-    ├── img/hero.jpg    # Hero 风景图（Unsplash 免费授权，可自行替换）
+    ├── img/
+    │   ├── hero.jpg    # Hero 风景图（Unsplash 免费授权，可自行替换）
+    │   └── books/      # 书单封面（真实出版物封面，本地文件）
     └── js/
         ├── data.js     # ★ 所有内容与站点元信息（改这里即可换内容）
         ├── shader.js   # WebGL 柔光着色器（页面底色）
@@ -73,12 +75,13 @@ python -m http.server 8123
 
 ## ✏️ 定制
 
-1. **换内容**：编辑 `assets/js/data.js` —— `SITE`（名字/邮箱/链接/订阅接口）、`TAGS`（标签色）、`POSTS`（文章，`content` 为 HTML 字符串，支持 h2/h3/p/ul/blockquote/pre）、`NOTES`（碎片笔记）、`BOOKS`（书单）、`ABOUT`（Now / Uses / Projects）。
+1. **换内容**：编辑 `assets/js/data.js` —— `SITE`（名字/邮箱/链接/订阅接口）、`TAGS`（标签色）、`POSTS`（文章，`content` 为 HTML 字符串，支持 h2/h3/p/ul/blockquote/pre）、`NOTES`（碎片笔记）、`BOOKS`（书单，含 ISBN / 出版社 / 页数 / 封面路径）、`ABOUT`（Now / Uses / Projects）。
 2. **换配色**：`assets/css/style.css` 顶部的 `:root` 令牌（`--accent` 三色系 + 玻璃透明度）；着色器色板在 `shader.js` 的 `FRAG` 中同步调整。
 3. **换玻璃手感**：`.glass` 的 `blur(22px) saturate(1.7)` 与五层内阴影是核心配方，动它之前先备份。
 4. **订阅**：在 `SITE.subscribeEndpoint` 填入 Buttondown / Formspree 等 POST 地址即可真实收集邮箱；留空则回退为 `mailto:` 邮件订阅。
 5. **评论**：在 `data.js` 的 `GISCUS` 中填入 GitHub 仓库与分类信息（见 <https://giscus.app>）；未配置时文章页展示引导卡片。
 6. **RSS**：`SITE.url` 换成部署域名后，记得同步 `feed.xml` / `feed.json` 中的绝对链接。
+7. **书单封面**：`BOOKS[].cover` 默认指向 `assets/img/books/b*.jpg`；换书时把封面图放进该目录并更新 `cover`、`isbn`、`link` 即可，无需联网。
 
 ## 🧪 兼容性
 

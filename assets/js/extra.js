@@ -399,22 +399,40 @@ window.LG = window.LG || {};
 
     function card(b) {
       const stars = b.rating ? '★'.repeat(b.rating) + '☆'.repeat(5 - b.rating) : '';
+      const metaBits = [b.author, b.publisher, b.year].filter(Boolean).join(' · ');
+      const showProgress = b.status === 'reading';
       return '<article class="book-card glass reveal" data-status="' + b.status + '">' +
-        '<div class="book-cover" style="--bc:' + b.color + '"><b>' + esc(b.title) + '</b><span>' + esc(b.author) + '</span></div>' +
+        '<a class="book-cover" href="' + b.link + '" target="_blank" rel="noopener" style="--bc:' + b.color + '" aria-label="在 Open Library 查看《' + esc(b.title) + '》">' +
+        '<img src="' + b.cover + '" alt="《' + esc(b.title) + '》封面" width="270" height="400" decoding="async">' +
+        '</a>' +
         '<div class="book-info">' +
-        '  <h3>' + esc(b.title) + '</h3>' +
-        '  <p class="book-meta">' + esc(b.author) + ' · ' + b.year + '</p>' +
+        '  <div class="book-head"><h3>' + esc(b.title) + '</h3>' +
+        '    <span class="book-status s-' + b.status + '">' + STATUS[b.status] + '</span></div>' +
+        (b.subtitle ? '<p class="book-sub">' + esc(b.subtitle) + '</p>' : '') +
+        '  <p class="book-meta">' + esc(metaBits) + '</p>' +
         '  <p class="book-note">' + esc(b.note) + '</p>' +
-        '  <div class="book-foot"><span class="book-status s-' + b.status + '">' + STATUS[b.status] + '</span>' +
+        (showProgress
+          ? '<div class="book-progress" role="progressbar" aria-valuenow="' + b.progress + '" aria-valuemin="0" aria-valuemax="100" aria-label="阅读进度"><i style="width:' + b.progress + '%"></i><span>' + b.progress + '%</span></div>'
+          : '') +
+        '  <div class="book-foot">' +
         (stars ? '<span class="book-rate" title="' + b.rating + ' 星">' + stars + '</span>' : '') +
-        '</div></div></article>';
+        '    <span class="book-pages">' + b.pages + ' 页' + (b.finished ? ' · ' + b.finished.slice(0, 7) + ' 读完' : '') + '</span>' +
+        '  </div>' +
+        '  <div class="book-extra">' +
+        '    <span class="book-isbn">ISBN ' + b.isbn + '</span>' +
+        '    <a class="book-link" href="' + b.link + '" target="_blank" rel="noopener">Open Library ↗</a>' +
+        '  </div>' +
+        '</div></article>';
     }
+
+    const doneCount = BOOKS.filter((b) => b.status === 'done').length;
+    const readingCount = BOOKS.filter((b) => b.status === 'reading').length;
 
     root.innerHTML =
       '<header class="page-head reveal">' +
       '  <div class="sec-no">LIBRARY / 阅读清单</div>' +
       '  <h1 class="page-title">书单</h1>' +
-      '  <p class="page-sub">读过的、在读的、想读的。' + BOOKS.length + ' 本，慢慢补。</p>' +
+      '  <p class="page-sub">' + BOOKS.length + ' 本，' + doneCount + ' 本读完，' + readingCount + ' 本在读。封面与书目信息均来自真实出版物。</p>' +
       '</header>' +
       '<div class="filter-row books-filter reveal">' + chips + '</div>' +
       '<div class="books-grid">' + BOOKS.map(card).join('') + '</div>' +

@@ -52,6 +52,47 @@
   });
   window.__ap = ap;
 
+  /* ---------- 播放状态记忆：刷新 / 整页跳转后回到上一首与进度 ---------- */
+  const MKEY = 'lg-music-state';
+  let savedState = null;
+  try { savedState = JSON.parse(sessionStorage.getItem(MKEY)); } catch (e) { }
+  if (savedState && typeof savedState.index === 'number' && savedState.index >= 0 && savedState.index < songs.length) {
+    if (savedState.index > 0) ap.list.switch(savedState.index);
+    const restoreTime = typeof savedState.time === 'number' ? savedState.time : 0;
+    const applyTime = () => {
+      try {
+        if (!restoreTime || !isFinite(ap.audio.duration)) return;
+        ap.audio.currentTime = Math.max(0, Math.min(restoreTime, ap.audio.duration - 0.5));
+      } catch (e) { }
+    };
+    ap.audio.addEventListener('loadedmetadata', applyTime, { once: true });
+    if (ap.audio.readyState >= 1) setTimeout(applyTime, 0);
+    if (savedState.playing) {
+      const p = ap.play();
+      if (p && p.catch) p.catch(() => { });
+    }
+  }
+  let lastMusicSave = 0;
+  function saveMusicState() {
+    try {
+      sessionStorage.setItem(MKEY, JSON.stringify({
+        index: ap.list.index || 0,
+        time: Math.round((ap.audio.currentTime || 0) * 10) / 10,
+        playing: !ap.audio.paused,
+      }));
+    } catch (e) { }
+  }
+  ap.audio.addEventListener('timeupdate', () => {
+    const now = Date.now();
+    if (now - lastMusicSave < 1500) return;
+    lastMusicSave = now;
+    saveMusicState();
+  });
+  ap.on('play', saveMusicState);
+  ap.on('pause', saveMusicState);
+  window.addEventListener('beforeunload', saveMusicState);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveMusicState(); });
+
   /* ---------- 切歌提示浮标 ---------- */
   let toastTimer = null;
   function showToast(text) {
@@ -81,7 +122,7 @@
   if (splashBtn) splashBtn.addEventListener('click', () => ap.toggle());
 
   /* ---------- 切歌 / 错误处理 ---------- */
-  function currentSong() { return songs[ap.audio.index] || songs[0]; }
+  function currentSong() { return songs[ap.list.index] || songs[0]; }
 
   let errorSkips = 0;
   ap.audio.addEventListener('error', () => {

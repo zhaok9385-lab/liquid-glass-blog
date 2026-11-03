@@ -583,14 +583,15 @@
   async function spaRoute(url, push) {
     if (REDUCED) { location.href = url; return; }
     doc.classList.add('vt-out');
-    await new Promise((r) => setTimeout(r, 400));
+    const cleanUrl = url.split('#')[0];   // fetch/缓存一律不带 hash
     try {
-      let html = pageCache.get(url);
+      await new Promise((r) => setTimeout(r, 400));
+      let html = pageCache.get(cleanUrl);
       if (!html) {
-        const res = await fetch(url);
+        const res = await fetch(cleanUrl);
         if (!res.ok) throw new Error(res.status);
         html = await res.text();
-        pageCache.set(url, html);
+        pageCache.set(cleanUrl, html);
       }
       const parsed = new DOMParser().parseFromString(html, 'text/html');
       const newMain = parsed.querySelector('main');
@@ -606,9 +607,13 @@
       collectMagnets();
       collectTilts();
       updateActiveNav();     // 底部胶囊滑到当前页
-      runEntrance();
+      runEntrance();         // 移除 vt-out、恢复过渡幕布、落到目标位置
     } catch (err) {
-      location.href = url;
+      /* 恢复失败：同地址强制刷新（脱离卡死），不同地址整页跳转 */
+      const t = new URL(cleanUrl, location.href);
+      if (t.pathname + t.search === location.pathname + location.search) location.reload();
+      else location.href = cleanUrl;
+      return;
     }
   }
 
