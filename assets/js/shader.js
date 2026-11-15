@@ -66,22 +66,39 @@
     '                fbm(uv * 1.35 + 2.2 * q + vec2(8.3, 2.8) - t * 0.5));',
     '  float f = fbm(uv * 1.35 + 2.5 * r);',
 
-    // 明暗双色板：暗 = 墨蓝夜湖（钢青/黛紫/灰梅）；亮 = 晴空柔光（长春蓝/湖青/霞橙）
+    // 明暗双色板：暗 = 墨蓝夜湖（钢青/黛紫/灰梅/琥珀）；亮 = 晴空柔光（长春蓝/湖青/霞橙/鎏金）
     '  vec3 vio  = mix(vec3(0.140, 0.150, 0.310), vec3(0.672, 0.700, 0.910), uLight);',
     '  vec3 cya  = mix(vec3(0.085, 0.225, 0.315), vec3(0.635, 0.820, 0.885), uLight);',
     '  vec3 mag  = mix(vec3(0.250, 0.165, 0.270), vec3(0.940, 0.780, 0.720), uLight);',
+    '  vec3 amb  = mix(vec3(0.560, 0.380, 0.160), vec3(0.980, 0.820, 0.560), uLight);',
 
     // 透明 blob 模式：只输出柔光色斑（alpha 叠加在照片/底色之上）
     '  float w1 = smoothstep(0.22, 0.85, f) * 0.60;',
     '  float w2 = smoothstep(0.35, 0.95, length(q)) * 0.42;',
     '  float w3 = smoothstep(0.55, 1.00, r.y) * 0.30;',
-    '  vec3 col = (vio * w1 + cya * w2 + mag * w3) / max(w1 + w2 + w3, 0.0001);',
+    '  float flow = w1 + w2 + w3;',
+    '  vec3 col = (vio * w1 + cya * w2 + mag * w3) / max(flow, 0.0001);',
+
+    // Stripe 式漂移色心：4 个光斑随时间游走，位置被 fBm 场扭出流体边缘
+    '  vec2 pw = uv + 0.55 * (q - 0.5) + 0.40 * (r - 0.5);',
+    '  vec2 cA = vec2(0.55 * sin(t * 1.10),        0.38 * cos(t * 0.83));',
+    '  vec2 cB = vec2(0.60 * cos(t * 0.63 + 2.1),  0.42 * sin(t * 0.91 + 1.7));',
+    '  vec2 cC = vec2(0.50 * sin(t * 0.77 + 4.0),  0.45 * cos(t * 0.59 + 3.2));',
+    '  vec2 cD = vec2(0.45 * cos(t * 1.02 + 5.5),  0.36 * sin(t * 0.68 + 0.6));',
+    '  float bA = exp(-dot(pw - cA, pw - cA) * 2.6);',
+    '  float bB = exp(-dot(pw - cB, pw - cB) * 3.0);',
+    '  float bC = exp(-dot(pw - cC, pw - cC) * 2.8);',
+    '  float bD = exp(-dot(pw - cD, pw - cD) * 3.4);',
+    '  float bw = bA + bB + bC + bD;',
+    '  vec3 blobCol = (cya * 1.15 * bA + vio * 1.20 * bB + mag * 1.15 * bC + amb * bD) / max(bw, 0.0001);',
+    '  float btotal = smoothstep(0.06, 0.92, bw);',
+    '  col = mix(col, blobCol, 0.68 * btotal);',
 
     '  float md = length(uv - mo);',                    // 鼠标辉光：光向指尖聚拢
     '  float glow = exp(-md * 3.4) * 0.30 * (1.0 - uLight * 0.4);',
     '  col += mix(cya, vio, 0.5) * glow * 1.6;',
 
-    '  float a = clamp(w1 + w2 + w3 + glow, 0.0, 1.0) * 0.75;',
+    '  float a = clamp(flow + glow + 0.95 * btotal, 0.0, 1.0) * 0.84;',
     '  gl_FragColor = vec4(col, a);',
     '}',
   ].join('\n');
