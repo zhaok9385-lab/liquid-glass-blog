@@ -129,26 +129,10 @@ img, svg { display: block; }
   height: 100%;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.30;
+  opacity: 0.3;
   transition: opacity 0.6s ease;
 }
-[data-theme="dark"] #aurora { opacity: 0.60; }
-/* 封面页：照片本身是主角，极光只留一点生机，避免灰膜感 */
-.cover-page #aurora { opacity: 0.12; }
-[data-theme="dark"] .cover-page #aurora { opacity: 0.32; }
-
-/* 内容页（文章/子页）：照片虚化成柔和色场退为氛围，极光升到幕布之上成为主背景光 */
-.post-page .bg-photo,
-.sub-page .bg-photo {
-  filter: blur(56px) saturate(1.08);
-  scale: 1.18;
-}
-.post-page .bg-veil,
-.sub-page .bg-veil { z-index: 1; }
-.post-page #aurora,
-.sub-page #aurora { z-index: 2; opacity: 0.40; }
-[data-theme="dark"] .post-page #aurora,
-[data-theme="dark"] .sub-page #aurora { opacity: 0.66; }
+[data-theme="dark"] #aurora { opacity: 0.5; }
 
 /* WebGL 不可用时的静态兜底 */
 .no-webgl body::before,
