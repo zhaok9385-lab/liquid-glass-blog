@@ -1301,7 +1301,7 @@ main, .footer { position: relative; z-index: 4; }
 }
 .prose h2 {
   margin: 2.2em 0 0.9em;
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.01em;
   display: flex;
@@ -1317,7 +1317,7 @@ main, .footer { position: relative; z-index: 4; }
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
   box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
 }
-.prose h3 { margin: 1.8em 0 0.7em; font-size: 18.5px; font-weight: 700; scroll-margin-top: 110px; }
+.prose h3 { margin: 1.8em 0 0.7em; font-size: 20px; font-weight: 700; scroll-margin-top: 110px; }
 .prose p { margin: 0.9em 0; color: var(--text-dim); }
 .prose p strong { color: var(--text); font-weight: 650; }
 .prose ul { margin: 1em 0; padding-left: 4px; list-style: none; }
