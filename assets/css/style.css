@@ -1207,7 +1207,13 @@ main, .footer { position: relative; z-index: 4; }
 
 .post-main { position: relative; z-index: 2; padding: 150px 0 60px; }
 
-.post-hero { max-width: 780px; margin: 0 auto 40px; padding-inline: 24px; }
+/* 与正文玻璃卡同一栅格：标题/标签/元信息的左缘与正文文本严格对齐 */
+.post-hero {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto 40px;
+  padding-inline: clamp(28px, 5vw, 64px);
+}
+.post-hero > * { max-width: 780px; }
 .back-link {
   margin-bottom: 22px;
   font-size: 12.5px;
@@ -1260,7 +1266,19 @@ main, .footer { position: relative; z-index: 4; }
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.24) 30%, rgba(255, 255, 255, 0.46));
 }
 
-.prose { font-size: 16px; line-height: 1.95; color: var(--text); max-width: 720px; }
+.prose { font-size: 16px; line-height: 1.95; color: var(--text); max-width: 720px; line-break: strict; }
+.prose p { text-wrap: pretty; }
+/* 正文链接：常驻半透明下划线 → hover 提亮为 accent（text-decoration-color 可平滑过渡） */
+.prose a {
+  color: inherit;
+  font-weight: 550;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+.prose a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .prose > p:first-of-type::first-letter {
   float: left;
   font-size: 3.4em;
