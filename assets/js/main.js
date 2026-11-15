@@ -226,6 +226,22 @@
   }
   armReveals();
   window.LG.armRevealsAll = armReveals;
+
+  /* 全局轻量提示浮标 */
+  let notifyTimer = null;
+  window.LG.notify = function (text) {
+    let t = document.getElementById('app-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'app-toast';
+      t.className = 'app-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(notifyTimer);
+    notifyTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  };
   window.LG.collectTilts = collectTilts;
 
   /* ============================================================
@@ -584,12 +600,16 @@
     if (REDUCED) { location.href = url; return; }
     doc.classList.add('vt-out');
     const cleanUrl = url.split('#')[0];   // fetch/缓存一律不带 hash
+    let swapped = false;
     try {
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, 380));
       let html = pageCache.get(cleanUrl);
       if (!html) {
-        const res = await fetch(cleanUrl);
-        if (!res.ok) throw new Error(res.status);
+        let res = null;
+        for (let i = 0; i < 2 && !res; i++) {            // 网络抖动重试一次
+          try { res = await fetch(cleanUrl); if (!res.ok) throw new Error(res.status); }
+          catch (e) { res = null; if (i === 1) throw e; await new Promise((r) => setTimeout(r, 250)); }
+        }
         html = await res.text();
         pageCache.set(cleanUrl, html);
       }
@@ -603,19 +623,25 @@
       mainEl.id = newMain.id;
       mainEl.innerHTML = newMain.innerHTML;
       if (push) history.pushState({}, '', url);
-      bootFor(parsed.body.className);
-      collectMagnets();
-      collectTilts();
-      updateActiveNav();     // 底部胶囊滑到当前页
-      runEntrance();         // 移除 vt-out、恢复过渡幕布、落到目标位置
+      swapped = true;
     } catch (err) {
-      /* 恢复失败：同地址强制刷新（脱离卡死），不同地址整页跳转 */
-      const t = new URL(cleanUrl, location.href);
-      if (t.pathname + t.search === location.pathname + location.search) location.reload();
-      else location.href = cleanUrl;
+      /* 换页失败：绝不整页刷新（那会重启音乐）—— 收幕回当前页并提示 */
+      console.warn('[router] 换页失败：', err);
+      doc.classList.remove('vt-out');
+      if (window.LG.notify) window.LG.notify('页面加载失败，请稍后重试');
       return;
     }
+    /* 组件初始化失败不应卡死页面 —— 已换页，照常收幕 */
+    try {
+      bootFor(document.body.className);
+      collectMagnets();
+      collectTilts();
+      updateActiveNav();
+    } catch (e) { console.warn('[router] init warning:', e); }
+    runEntrance();
   }
+  /* 兜底：无论任何路径，幕布 3 秒内必收 */
+  setInterval(() => doc.classList.remove('vt-out'), 3000);
 
   document.addEventListener('click', (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
