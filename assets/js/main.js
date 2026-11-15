@@ -134,14 +134,17 @@
   const bgPhoto = document.querySelector('.bg-photo');
   const splashContent = document.querySelector('.splash-content');
   function onScroll() {
+    const isSub = document.body.classList.contains('post-page') || document.body.classList.contains('sub-page');
     if (bgVeil) {
-      const isSub = document.body.classList.contains('post-page') || document.body.classList.contains('sub-page');
-      const base = isSub ? 0.58 : 0;
+      const base = isSub ? 0.72 : 0;
+      const maxV = isSub ? 0.88 : 0.94;
       const p = Math.min(1, window.scrollY / (window.innerHeight * 1.02));
-      bgVeil.style.opacity = (base + p * (0.94 - base)).toFixed(3);
+      bgVeil.style.opacity = (base + p * (maxV - base)).toFixed(3);
     }
     if (bgPhoto && !document.body.classList.contains('cover-page')) {
-      bgPhoto.style.transform = 'translateY(' + (window.scrollY * 0.16).toFixed(1) + 'px)';
+      // 内容页照片已虚化为色场，视差收小并封顶，避免长时间阅读后露出边缘
+      const dy = isSub ? Math.min(window.scrollY * 0.06, 48) : window.scrollY * 0.16;
+      bgPhoto.style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
     }
     if (splashContent) {
       const p = Math.min(1, window.scrollY / (window.innerHeight * 0.85));
