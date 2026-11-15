@@ -14,8 +14,8 @@
   --glass-a: rgba(255, 255, 255, 0.09);
   --glass-b: rgba(255, 255, 255, 0.03);
   --glass-c: rgba(255, 255, 255, 0.06);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-hi: rgba(255, 255, 255, 0.34);
+  --glass-border: rgba(255, 255, 255, 0.17);
+  --glass-hi: rgba(255, 255, 255, 0.38);
   --glass-shadow: 0 8px 32px rgba(2, 4, 16, 0.38);
 
   --accent: #8fc9ee;
@@ -593,6 +593,7 @@ main, .footer { position: relative; z-index: 4; }
 }
 .btn svg { width: 15px; height: 15px; transition: transform 0.35s var(--ease-out); }
 .btn:hover svg { transform: translateX(3px); }
+.btn:active { transform: scale(0.97); }
 .btn-primary {
   color: #26304e;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.62));
@@ -1168,8 +1169,16 @@ main, .footer { position: relative; z-index: 4; }
   color: var(--text-dim);
 }
 .footer-links { display: flex; gap: 20px; }
-.footer-links a { color: var(--text-dim); transition: color 0.3s; }
-.footer-links a:hover { color: var(--accent); }
+.footer-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: color 0.3s, background-size 0.3s var(--ease-out);
+}
+.footer-links a:hover { color: var(--accent); background-size: 100% 1px; }
 
 #to-top {
   position: fixed;
