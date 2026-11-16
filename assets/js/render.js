@@ -5,9 +5,9 @@
 (function () {
   'use strict';
 
-  const page = document.body.dataset.page || '';
   const $ = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+  const go = (href) => { if (window.Site && Site.go) Site.go(href); else location.href = href; };
 
   const esc = (s) => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -21,6 +21,7 @@
     '<span class="tag">' + esc(tagLabel(t)) + '</span>').join('');
 
   /* ---------- 封面 ---------- */
+  let coverKeyBound = false;
   function initCover() {
     const posts = (typeof POSTS !== 'undefined') ? POSTS.length : 0;
     const chars = (typeof POSTS !== 'undefined')
@@ -36,19 +37,20 @@
 
     const cta = $('#cover-enter');
     const cover = $('.cover');
-    if (cta) cta.addEventListener('click', (e) => {
-      e.preventDefault();
-      location.href = 'home.html';
-    });
+    if (cta) cta.addEventListener('click', (e) => { e.preventDefault(); go('home.html'); });
     if (cover) {
       cover.addEventListener('click', (e) => {
         if (e.target.closest('a, button')) return;
-        location.href = 'home.html';
+        go('home.html');
       });
     }
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === 'ArrowDown') location.href = 'home.html';
-    });
+    if (!coverKeyBound) {
+      coverKeyBound = true;
+      window.addEventListener('keydown', (e) => {
+        if (document.body.dataset.page !== 'cover') return;
+        if (e.key === 'Enter' || e.key === 'ArrowDown') go('home.html');
+      });
+    }
   }
 
   /* ---------- 首页 ---------- */
@@ -249,32 +251,96 @@
     draw();
   }
 
-  /* ---------- 相册 ---------- */
+  /* ---------- 相册（静态照片 + 本机上传） ---------- */
+  const PHOTO_KEY = 'lg-photos-v1';
+  const PHOTO_QUOTA = 4.2 * 1024 * 1024;
+  let lbBound = false;
+  let albumApi = null;
+  const lbState = { open: false, idx: 0, items: [] };
+
+  function readUserPhotos() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(PHOTO_KEY));
+      return Array.isArray(arr) ? arr.filter((p) => p && p.src) : [];
+    } catch (e) { return []; }
+  }
+  function writeUserPhotos(list) {
+    try { localStorage.setItem(PHOTO_KEY, JSON.stringify(list)); return true; }
+    catch (e) { return false; }
+  }
+  const photoBytes = (list) => list.reduce((n, p) => n + (p.src ? p.src.length : 0), 0);
+
+  /* 压缩：长边 1440、JPEG 0.82，避免 localStorage 很快被塞满 */
+  function compressImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const max = 1440;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        const ctx = cv.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(cv.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode')); };
+      img.src = url;
+    });
+  }
+
   function initPhotos() {
     const grid = $('#photo-grid');
     if (!grid) return;
-    const photos = (typeof PHOTOS !== 'undefined') ? PHOTOS : [];
-    grid.innerHTML = photos.map((p, i) =>
-      '<a class="photo-card" href="' + esc(p.src) + '" data-index="' + i + '" aria-label="查看大图：' + esc(p.cap) + '">' +
-        '<img src="' + esc(p.src) + '" alt="' + esc(p.cap) + '" loading="' + (i < 3 ? 'eager' : 'lazy') + '">' +
-        '<figcaption><span class="cap-t">' + esc(p.cap) + '</span><span>' + esc(p.date) + '</span></figcaption>' +
-      '</a>').join('');
-
+    const base = (typeof PHOTOS !== 'undefined') ? PHOTOS : [];
+    const input = $('#photo-input');
+    const hint = $('#album-hint');
     const lb = $('#lightbox');
     const lbImg = $('#lb-img');
     const lbCap = $('#lb-cap');
+    const lbTools = $('#lb-tools');
+    const renameInput = $('#lb-rename');
     if (!lb) return;
-    let idx = 0;
+
+    let items = base.map((p) => ({ src: p.src, cap: p.cap, date: p.date, user: false }))
+      .concat(readUserPhotos().map((p) => ({ src: p.src, cap: p.cap, date: p.date, user: true, id: p.id })));
+
+    function draw() {
+      grid.innerHTML = items.map((p, i) =>
+        '<button class="photo-card' + (p.user ? ' is-user' : '') + '" type="button" data-index="' + i + '" aria-label="查看大图：' + esc(p.cap) + '">' +
+          '<img src="' + esc(p.src) + '" alt="' + esc(p.cap) + '" loading="' + (i < 3 ? 'eager' : 'lazy') + '">' +
+          (p.user ? '<span class="photo-badge">我上传的</span>' : '') +
+          '<figcaption><span class="cap-t">' + esc(p.cap) + '</span><span>' + esc(p.date) + '</span></figcaption>' +
+        '</button>').join('');
+      if (hint) {
+        const mine = items.filter((p) => p.user).length;
+        hint.textContent = '共 ' + items.length + ' 张照片' + (mine ? '，其中 ' + mine + ' 张是你上传的' : '') +
+          '。上传的照片只保存在这台设备的浏览器里。';
+      }
+    }
 
     function open(i) {
-      idx = (i + photos.length) % photos.length;
-      lbImg.src = photos[idx].src;
-      lbImg.alt = photos[idx].cap;
-      lbCap.textContent = photos[idx].cap + ' · ' + photos[idx].date;
+      if (!items.length) return;
+      lbState.idx = (i + items.length) % items.length;
+      lbState.open = true;
+      lbState.items = items;
+      const p = items[lbState.idx];
+      lbImg.src = p.src;
+      lbImg.alt = p.cap;
+      lbCap.textContent = p.cap + ' · ' + p.date;
+      if (lbTools) {
+        lbTools.hidden = !p.user;
+        if (p.user) renameInput.value = p.cap;
+      }
       lb.classList.add('open');
       lb.setAttribute('aria-hidden', 'false');
     }
     function close() {
+      lbState.open = false;
       lb.classList.remove('open');
       lb.setAttribute('aria-hidden', 'true');
     }
@@ -282,17 +348,96 @@
     grid.addEventListener('click', (e) => {
       const card = e.target.closest('.photo-card');
       if (!card) return;
-      e.preventDefault();
       open(Number(card.dataset.index));
     });
     $('#lb-close').addEventListener('click', close);
-    lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
-    document.addEventListener('keydown', (e) => {
-      if (!lb.classList.contains('open')) return;
-      if (e.key === 'Escape') close();
-      if (e.key === 'ArrowRight') open(idx + 1);
-      if (e.key === 'ArrowLeft') open(idx - 1);
-    });
+    lb.addEventListener('click', (e) => { if (e.target === lb || e.target.classList.contains('lb-stage')) close(); });
+
+    if (!lbBound) {
+      lbBound = true;
+      document.addEventListener('keydown', (e) => {
+        if (!lbState.open || !albumApi) return;
+        if (e.key === 'Escape') albumApi.close();
+        else if (e.key === 'ArrowRight') { e.preventDefault(); albumApi.step(1); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); albumApi.step(-1); }
+      });
+    }
+
+    albumApi = {
+      close,
+      step: (dir) => open(lbState.idx + dir),
+    };
+
+    /* 上传 */
+    if (input) {
+      input.addEventListener('change', async () => {
+        const files = Array.from(input.files || []).filter((f) => f.type.startsWith('image/'));
+        input.value = '';
+        if (!files.length) return;
+        const saved = readUserPhotos();
+        let used = photoBytes(saved);
+        let added = 0, lost = 0;
+        const label = input.closest('.album-add');
+        if (label) label.classList.add('busy');
+        for (const file of files) {
+          try {
+            if (used >= PHOTO_QUOTA) { lost += 1; continue; }
+            const src = await compressImage(file);
+            if (used + src.length > PHOTO_QUOTA) { lost += 1; continue; }
+            const now = new Date();
+            const name = (file.name || 'photo').replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').slice(0, 24);
+            saved.unshift({
+              id: 'p' + Date.now() + Math.random().toString(36).slice(2, 6),
+              src,
+              cap: name || '未命名照片',
+              date: now.getFullYear() + ' / ' + String(now.getMonth() + 1).padStart(2, '0'),
+            });
+            used += src.length;
+            added += 1;
+          } catch (err) { lost += 1; }
+        }
+        if (label) label.classList.remove('busy');
+        if (writeUserPhotos(saved)) {
+          items = base.map((p) => ({ src: p.src, cap: p.cap, date: p.date, user: false }))
+            .concat(saved.map((p) => ({ src: p.src, cap: p.cap, date: p.date, user: true, id: p.id })));
+          draw();
+        } else {
+          window.Site && Site.toast('本地空间不足，写作失败');
+        }
+        if (added && lost) Site.toast('已添加 ' + added + ' 张，' + lost + ' 张因空间不足未保存');
+        else if (added) Site.toast('已添加 ' + added + ' 张照片');
+        else if (lost) Site.toast('没存下：本地空间不够了，先删几张');
+      });
+    }
+
+    /* 改名 / 删除（仅本机上传的照片） */
+    if (lbTools) {
+      const saveName = () => {
+        const p = items[lbState.idx];
+        if (!p || !p.user) return;
+        const val = (renameInput.value || '').trim().slice(0, 24) || '未命名照片';
+        const saved = readUserPhotos().map((u) => u.id === p.id ? Object.assign({}, u, { cap: val }) : u);
+        writeUserPhotos(saved);
+        p.cap = val;
+        lbCap.textContent = val + ' · ' + p.date;
+        draw();
+        Site.toast('标题已保存');
+      };
+      $('#lb-save').addEventListener('click', saveName);
+      renameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveName(); } });
+      $('#lb-del').addEventListener('click', () => {
+        const p = items[lbState.idx];
+        if (!p || !p.user) return;
+        const saved = readUserPhotos().filter((u) => u.id !== p.id);
+        writeUserPhotos(saved);
+        items = items.filter((it) => !(it.user && it.id === p.id));
+        draw();
+        close();
+        Site.toast('已删除');
+      });
+    }
+
+    draw();
   }
 
   /* ---------- 留言 ---------- */
@@ -439,8 +584,18 @@
     about: initAbout,
     lab: initLab,
   };
-  if (MAP[page]) {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', MAP[page]);
-    else MAP[page]();
+
+  let lastNode = null, lastPage = null;
+  function init() {
+    const main = document.getElementById('main');
+    const page = document.body.dataset.page || '';
+    if (main && main === lastNode && page === lastPage) return;
+    lastNode = main; lastPage = page;
+    if (MAP[page]) MAP[page]();
   }
+
+  window.SiteRender = { init };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
 })();

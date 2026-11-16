@@ -19,16 +19,17 @@
     { href: 'lab.html', label: '实验室' },
   ];
 
-  const current = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  const isBlog = current === 'post.html' || current === 'home.html';
+  const current0 = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  let current = current0;
+  const isBlog = (p) => p === 'post.html' || p === 'home.html';
 
   /* ---------- 顶栏 ---------- */
   const sunIcon = '<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M19.1 4.9l-1.6 1.6M6.5 17.5l-1.6 1.6"/></svg>';
   const moonIcon = '<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 14.2A8.3 8.3 0 0 1 9.8 3.8a8.3 8.3 0 1 0 10.4 10.4z"/></svg>';
 
   const navHTML = NAV.map((item) => {
-    const active = item.href === current || (item.href === 'home.html' && isBlog);
-    return '<a href="' + item.href + '"' + (active ? ' aria-current="page"' : '') + '>' + item.label + '</a>';
+    const active = item.href === current || (item.href === 'home.html' && isBlog(current));
+    return '<a href="' + item.href + '" data-href="' + item.href + '"' + (active ? ' aria-current="page"' : '') + '>' + item.label + '</a>';
   }).join('');
 
   const moreHTML = MORE.map((item) =>
@@ -57,6 +58,13 @@
 
   const mount = document.getElementById('site-header');
   if (mount) mount.replaceWith(header); else document.body.insertAdjacentElement('afterbegin', header);
+
+  /* ---------- 背景氛围层（首页动态，其余页面静止） ---------- */
+  const air = document.createElement('div');
+  air.className = 'air-bg';
+  air.setAttribute('aria-hidden', 'true');
+  air.innerHTML = '<span class="air-blob a"></span><span class="air-blob b"></span><span class="air-blob c"></span><span class="air-grain"></span>';
+  document.body.insertAdjacentElement('afterbegin', air);
 
   /* ---------- 页脚 ---------- */
   const footer = document.createElement('footer');
@@ -119,8 +127,8 @@
   drawer.className = 'nav-drawer';
   drawer.id = 'nav-drawer';
   drawer.innerHTML = NAV.concat(MORE).map((item) => {
-    const active = item.href === current || (item.href === 'home.html' && isBlog);
-    return '<a href="' + item.href + '"' + (active ? ' aria-current="page"' : '') + '>' + item.label + '</a>';
+    const active = item.href === current || (item.href === 'home.html' && isBlog(current));
+    return '<a href="' + item.href + '" data-href="' + item.href + '"' + (active ? ' aria-current="page"' : '') + '>' + item.label + '</a>';
   }).join('');
   document.body.appendChild(drawer);
 
@@ -257,7 +265,23 @@
   });
 
   /* ---------- 导出 ---------- */
-  window.Site = { toast, setTheme, openPalette, closePalette };
+  function setCurrent(file) {
+    const norm = (s) => String(s || '').toLowerCase().replace(/\.html$/, '').replace(/^index$/, 'cover');
+    current = norm(file);
+    const mark = (scope) => {
+      scope.querySelectorAll('a[data-href]').forEach((a) => {
+        const on = norm(a.dataset.href) === current ||
+          (norm(a.dataset.href) === 'home' && (current === 'post' || current === 'home'));
+        if (on) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+    };
+    mark(header);
+    mark(drawer);
+    document.body.classList.toggle('is-cover', current === 'cover');
+  }
+
+  window.Site = { toast, setTheme, openPalette, closePalette, setCurrent, closeDrawer };
 
   /* 支持 #search 深链直接打开搜索 */
   if (location.hash === '#search') setTimeout(openPalette, 80);
