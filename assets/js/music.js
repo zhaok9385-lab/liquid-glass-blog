@@ -94,6 +94,21 @@
   /* ---------- 收起 / 展开：收成一个唱片圆钮 ---------- */
   const MINK = 'lg-music-min';
   function setMin(min) {
+    const wasMin = dock.classList.contains('is-min');
+    clearTimeout(dock.__minTimer);
+    clearTimeout(dock.__unlockTimer);
+    clearTimeout(dock.__openTimer);
+    // 如果上一次收起留下的“锁”还在，先解掉，否则展开会没有任何过渡
+    dock.classList.remove('is-locked');
+
+    if (min) {
+      dock.classList.remove('is-opening');
+    } else if (wasMin) {
+      // 展开时先把正文藏起来，等宽度回到能放下文字再显示，避免在 58px 里挤成一团
+      dock.classList.add('is-opening');
+      dock.getBoundingClientRect();
+    }
+
     dock.classList.toggle('is-min', min);
     el.min.setAttribute('aria-label', min ? '展开播放器' : '收起播放器');
     el.min.title = min ? '展开播放器' : '收起播放器';
@@ -107,6 +122,21 @@
     }
     try { localStorage.setItem(MINK, min ? '1' : ''); } catch (e) { }
 
+    if (!min && wasMin) {
+      const start = Date.now();
+      const target = Math.min(360, window.innerWidth - 80);
+      const poll = () => {
+        if (dock.classList.contains('is-min')) return;
+        const w = dock.getBoundingClientRect().width;
+        if (w >= target - 6 || Date.now() - start > 700) {
+          dock.classList.remove('is-opening');
+          return;
+        }
+        dock.__openTimer = setTimeout(poll, 50);
+      };
+      poll();
+    }
+
     // 某些内嵌浏览器会把 CSS 过渡的时钟冻住，导致一直停在半收起的胶囊上。
     // 0.52s 后如果还没到达目标形态，就直接锁到终点，保证它一定是一枚圆唱片。
     clearTimeout(dock.__minTimer);
@@ -117,7 +147,8 @@
       const done = min ? (w <= 72 && op < .1) : (w >= Math.min(300, window.innerWidth - 80) && op > .9);
       if (!done) {
         dock.classList.add('is-locked');
-        setTimeout(() => dock.classList.remove('is-locked'), 600);
+        clearTimeout(dock.__unlockTimer);
+        dock.__unlockTimer = setTimeout(() => dock.classList.remove('is-locked'), 600);
       }
     }, 520);
   }

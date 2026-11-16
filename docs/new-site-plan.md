@@ -356,3 +356,18 @@ liquid-glass-blog/
 - 归档页 1440×1000：顶部蓝→桃→绿的色场、网格、页头轨道可见；巨号 `05` 不再出现。
 - 收起态：`width 58 / height 58–62 / art 52 / body display:none`；截图里只剩圆盘与封面，白胶囊消失。
 - 已知限制：BU 内嵌浏览器在页面 hidden 时会冻结 CSS 过渡，宽度可能停在 58、高度停在 62；由于圆盘与封面是绝对定位，视觉仍是圆。真实浏览器按 0.44s 播放。
+
+## 十六、第六轮修订（2026-11-16）
+
+这一轮只处理两个新问题：收起一次后再展开会卡顿；背景希望按时间切换。
+
+1. **展开卡顿的两个根因** → 一是收起 0.52s 后如果动画没走完，会加 `.is-locked` 把过渡锁住，用户很快再点展开时锁还没解除，展开就没有过渡、像卡住；二是 `.is-min` 用 `display:none` 藏正文，展开瞬间正文回到 58px 宽的容器里，文字和控制区先挤一下再随宽度展开。修复：`setMin()` 一开始就清掉 `is-locked` 与解锁计时器；展开时加 `.is-opening` 先藏正文，轮询宽度到 360px 或 700ms 后再显示；封面从绝对定位改为始终绝对定位，收起 52px、展开 46px，位置用 left/top 过渡，不再在“网格子项 ↔ 绝对定位”之间跳。
+2. **按时间切换的背景** → 在 `chrome.js` 里按本地小时分四段：05–08 黎明、08–16 白天、16–19 黄昏、19–05 夜晚，每 10 分钟和页面重新可见时刷新 `body[data-time]`；CSS 用 `--sky-a/b/c` 驱动顶部极光、锥形光带和首页光球。首页右侧改成有清晰边缘的圆盘：白天是暖黄太阳、黄昏是橙日、夜里是带陨石坑的冷白月亮，外圈仍是 292px 轨道；夜里三团空气光也统一压到靛蓝/青灰，避免上下半页不同季。封面照片不参与时间调色，保留晨昏云海本身。
+3. **线上参考** → localghost 的《Time-based background colour transitions with Temporal and CSS color-mix》用时间段切色（https://localghost.dev/blog/time-based-background-colour-transitions-with-temporal-and-css-color-mix/）；npm `dynamic-sky`（https://www.npmjs.com/package/dynamic-sky）与 `horizon-sky`（https://www.npmjs.com/package/horizon-sky）用时间与经纬度算天空渐变；GitHub 上的 Chronos（http://raw.githubusercontent.com/sajarin/prismorphism/HEAD/CHRONOS.md）把日出、正午、黄昏、夜里的色写成 `--chronos-*` 变量。这里没有引入依赖，只取“按时间切一组 CSS 变量”的方法，保持纯静态。
+4. **预览方式** → 正常打开按本地时间自动判断；调试时可加 `?time=dawn|day|dusk|night`，例如 `/home.html?time=night`。
+
+**验证**
+- 21:00 本地打开首页 → `data-time=night`，右侧是冷白月亮，顶部靛蓝、底部冷灰，播放器仍是深色玻璃。
+- `?time=day` → 暖黄太阳、蓝色天空；`?time=dusk` → 橙日与珊瑚色光带。
+- 收起后 0.9s 内再展开：`is-locked` 被清除，宽度从 58 → 372/576，正文在宽度到位后出现，无 58px 内的挤压；归档页与移动端同样成立。
+- 已知限制不变：BU hidden 时 CSS 过渡冻结，宽度/高度可能停在中间；几何与圆盘仍正确。

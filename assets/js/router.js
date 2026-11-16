@@ -51,6 +51,7 @@
     if (desc && mine) mine.setAttribute('content', desc.getAttribute('content') || '');
 
     if (window.Site && Site.setCurrent) Site.setCurrent(pageOf(url));
+    if (window.Site && Site.applyTimePhase) Site.applyTimePhase();
 
     // 标题栏与主题色跟随页面
     const tc = doc.querySelector('meta[name="theme-color"]');

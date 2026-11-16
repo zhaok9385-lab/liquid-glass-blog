@@ -23,6 +23,28 @@
   let current = current0;
   const isBlog = (p) => p === 'post.html' || p === 'home.html';
 
+  /* ---------- 时间背景：黎明的粉、白天的蓝、黄昏的橙、夜里的靛 ---------- */
+  const TIME_LABEL = { dawn: '黎明', day: '白天', dusk: '黄昏', night: '夜晚' };
+  function phaseForHour(hour) {
+    if (hour >= 5 && hour < 8) return 'dawn';
+    if (hour >= 8 && hour < 16) return 'day';
+    if (hour >= 16 && hour < 19) return 'dusk';
+    return 'night';
+  }
+  function applyTimePhase() {
+    const forced = new URLSearchParams(location.search).get('time');
+    const phase = TIME_LABEL[forced] ? forced : phaseForHour(new Date().getHours());
+    document.body.dataset.time = phase;
+    document.body.dataset.timeLabel = TIME_LABEL[phase];
+    const note = document.querySelector('#time-phase');
+    if (note) note.textContent = '现在 · ' + TIME_LABEL[phase];
+  }
+  applyTimePhase();
+  setInterval(applyTimePhase, 10 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) applyTimePhase();
+  });
+
   /* ---------- 顶栏 ---------- */
   const sunIcon = '<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M19.1 4.9l-1.6 1.6M6.5 17.5l-1.6 1.6"/></svg>';
   const moonIcon = '<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 14.2A8.3 8.3 0 0 1 9.8 3.8a8.3 8.3 0 1 0 10.4 10.4z"/></svg>';
@@ -321,7 +343,7 @@
     document.body.classList.toggle('is-cover', current === 'cover');
   }
 
-  window.Site = { toast, setTheme, openPalette, closePalette, setCurrent, closeDrawer };
+  window.Site = { toast, setTheme, openPalette, closePalette, setCurrent, closeDrawer, applyTimePhase };
 
   /* 支持 #search 深链直接打开搜索 */
   if (location.hash === '#search') setTimeout(openPalette, 80);
