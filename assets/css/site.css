@@ -2076,11 +2076,246 @@ body[data-time="dusk"] .hero-orb {
 }
 body[data-time="night"] .hero-orb {
   background:
-    radial-gradient(circle at 36% 34%, rgba(164, 176, 194, .34) 0 12%, transparent 13%),
-    radial-gradient(circle at 58% 57%, rgba(164, 176, 194, .26) 0 8%, transparent 9%),
-    radial-gradient(circle at 50% 48%, #F7F4E8 0 58%, #E4E9F0 76%, rgba(200, 212, 228, .92) 100%);
-  box-shadow: 0 0 62px 16px rgba(170, 192, 224, .30);
-  opacity: .92;
+    radial-gradient(circle at 34% 32%, rgba(150, 166, 186, .20) 0 10%, rgba(150, 166, 186, .07) 12%, transparent 18%),
+    radial-gradient(circle at 58% 56%, rgba(150, 166, 186, .16) 0 7%, rgba(150, 166, 186, .06) 9%, transparent 14%),
+    radial-gradient(circle at 40% 38%, #FFFDF4 0 34%, #F1EDE1 54%, #DBDFE6 78%, #BBC7D3 94%, #94A6B6 100%);
+  box-shadow:
+    inset -16px -12px 34px rgba(74, 96, 124, .30),
+    inset 10px 8px 26px rgba(255, 255, 255, .30),
+    0 0 62px 16px rgba(170, 192, 224, .30);
+  opacity: .94;
+}
+
+/* ============================================================
+   28b. 首页夜空场景：深色全幅底 + 自走极光 + 星点 + 轨道日月
+   ============================================================ */
+.hero-stage {
+  --scene-a: #04080F;
+  --scene-b: #071522;
+  --scene-c: #0C2530;
+  --aur-a: 70, 226, 208;
+  --aur-b: 118, 138, 255;
+  --aur-c: 255, 188, 140;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: calc(-1 * var(--nav-h));
+  padding: calc(var(--nav-h) + 46px) 0 84px;
+  min-height: 588px;
+  border-radius: 0 0 40px 40px;
+  color: #F5F1E6;
+  background:
+    radial-gradient(88% 110% at 18% -10%, rgba(var(--aur-a), .16), transparent 62%),
+    radial-gradient(70% 90% at 84% 0%, rgba(var(--aur-b), .18), transparent 64%),
+    linear-gradient(180deg, var(--scene-a) 0%, var(--scene-b) 56%, var(--scene-c) 100%);
+  box-shadow: 0 46px 90px -54px rgba(3, 10, 18, .62);
+}
+body[data-time="dawn"] .hero-stage {
+  --scene-a: #1A1324; --scene-b: #5A3446; --scene-c: #A2605A;
+  --aur-a: 255, 168, 170; --aur-b: 190, 170, 255; --aur-c: 255, 200, 140;
+}
+body[data-time="day"] .hero-stage {
+  --scene-a: #07253A; --scene-b: #0D4560; --scene-c: #175E73;
+  --aur-a: 120, 220, 225; --aur-b: 120, 170, 255; --aur-c: 255, 214, 150;
+}
+body[data-time="dusk"] .hero-stage {
+  --scene-a: #1C1020; --scene-b: #5C2C38; --scene-c: #B65C42;
+  --aur-a: 255, 138, 110; --aur-b: 180, 150, 235; --aur-c: 255, 190, 120;
+}
+.hero-sky { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.hero-stage > .wrap { position: relative; z-index: 1; }
+.hero-stage .hero { padding: 0 0 6px; }
+.hero-stage .hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 26px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: rgba(224, 238, 246, .66);
+  background: rgba(255, 255, 255, .055);
+  border: 1px solid rgba(255, 255, 255, .14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+.hero-stage .hero-eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgb(var(--aur-a));
+  box-shadow: 0 0 12px rgba(var(--aur-a), .9);
+  animation: eyebrowPulse 3.6s ease-in-out infinite alternate;
+}
+@keyframes eyebrowPulse {
+  0% { opacity: .55; transform: scale(.9); }
+  100% { opacity: 1; transform: scale(1.15); }
+}
+.hero-stage .hero-title {
+  max-width: 19ch;
+  color: #F7F3E7;
+  font-size: clamp(38px, 4.6vw, 58px);
+  line-height: 1.2;
+  text-shadow: 0 2px 34px rgba(0, 0, 0, .34);
+}
+.hero-title-2 { color: #CDE4DE; }
+.hero-stage .hero-lede { max-width: 44ch; color: rgba(232, 240, 246, .70); }
+.hero-stage .hero-meta {
+  margin-top: 30px;
+  padding-top: 18px;
+  max-width: 640px;
+  color: rgba(223, 235, 245, .54);
+  border-top: 1px solid rgba(255, 255, 255, .12);
+}
+.hero-stage .hero-meta i {
+  background: rgb(var(--aur-a));
+  opacity: .9;
+  box-shadow: 0 0 9px rgba(var(--aur-a), .75);
+}
+/* 轨道上的日月：在深色底上放大一点，给足光晕 */
+.hero-stage .hero-orb {
+  right: 48px;
+  top: 38%;
+  width: 148px;
+  height: 148px;
+  box-shadow:
+    inset -16px -12px 34px rgba(18, 32, 48, .30),
+    inset 10px 8px 28px rgba(255, 255, 255, .28),
+    0 0 110px 28px rgba(var(--aur-b), .24);
+}
+.hero-stage .hero-orb::after { inset: -72px; border-color: rgba(255, 255, 255, .30); opacity: .52; }
+.hero-stage .hero-orb::before {
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, .10), 0 0 24px rgba(var(--aur-c), .85);
+}
+/* 三条自走极光 */
+.hero-aurora {
+  position: absolute;
+  left: -18%;
+  width: 136%;
+  height: 64%;
+  filter: blur(48px) saturate(1.35);
+  mix-blend-mode: screen;
+  opacity: .62;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.hero-aurora.a {
+  top: -18%;
+  background: radial-gradient(46% 58% at 28% 30%, rgba(var(--aur-a), .54), transparent 70%);
+  animation: heroAuroraA 22s var(--ease) infinite alternate;
+}
+.hero-aurora.b {
+  top: -24%;
+  background: conic-gradient(from 210deg at 62% 8%,
+    rgba(var(--aur-b), .42),
+    transparent 24%,
+    rgba(var(--aur-c), .36) 52%,
+    transparent 78%);
+  animation: heroAuroraB 30s linear infinite;
+}
+.hero-aurora.c {
+  top: 24%;
+  height: 44%;
+  filter: blur(30px) saturate(1.4);
+  background: linear-gradient(100deg,
+    transparent 8%,
+    rgba(var(--aur-a), .20) 24%,
+    rgba(var(--aur-b), .32) 48%,
+    rgba(var(--aur-c), .20) 66%,
+    transparent 86%);
+  animation: heroAuroraC 17s var(--ease) infinite alternate;
+}
+@keyframes heroAuroraA {
+  0%   { transform: translate3d(-5%, -2%, 0) rotate(-8deg) scale(1.02); opacity: .46; }
+  100% { transform: translate3d(7%, 4%, 0) rotate(4deg) scale(1.12); opacity: .78; }
+}
+@keyframes heroAuroraB {
+  0%   { transform: translate3d(4%, 0, 0) rotate(-10deg); opacity: .44; }
+  50%  { transform: translate3d(-6%, 5%, 0) rotate(6deg); opacity: .72; }
+  100% { transform: translate3d(4%, 0, 0) rotate(-10deg); opacity: .44; }
+}
+@keyframes heroAuroraC {
+  0%   { transform: translate3d(-8%, 2%, 0) skewY(-2deg); opacity: .34; }
+  100% { transform: translate3d(8%, -3%, 0) skewY(1.4deg); opacity: .64; }
+}
+/* 星点：夜里最亮，白天只留极淡的一层 */
+.hero-stars {
+  position: absolute;
+  inset: 0;
+  opacity: .62;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 18%, rgba(255, 255, 255, .9), transparent 60%),
+    radial-gradient(1.2px 1.2px at 33% 9%, rgba(255, 255, 255, .7), transparent 60%),
+    radial-gradient(1.8px 1.8px at 58% 26%, rgba(255, 236, 216, .8), transparent 60%),
+    radial-gradient(1.1px 1.1px at 76% 12%, rgba(214, 234, 255, .75), transparent 60%),
+    radial-gradient(1.4px 1.4px at 88% 34%, rgba(255, 255, 255, .6), transparent 60%),
+    radial-gradient(1.2px 1.2px at 46% 44%, rgba(255, 232, 206, .55), transparent 60%);
+  background-size: 560px 420px;
+  mix-blend-mode: screen;
+  animation: starBreath 7s ease-in-out infinite alternate;
+  mask-image: linear-gradient(#000 0 62%, transparent 92%);
+}
+@keyframes starBreath {
+  0% { opacity: .38; }
+  100% { opacity: .72; }
+}
+body[data-time="day"] .hero-stage .hero-stars { opacity: .14; }
+body[data-time="dawn"] .hero-stage .hero-stars { opacity: .30; }
+body[data-time="dusk"] .hero-stage .hero-stars { opacity: .24; }
+/* 深色底上的加号网格与颗粒，避免大色场出现 banding */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  opacity: .38;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><path d='M18 8v20M8 18h20' stroke='%23FFFFFF' stroke-opacity='.18' stroke-width='1'/></svg>");
+  background-size: 36px 36px;
+  mask-image: radial-gradient(86% 74% at 50% 0%, #000 0%, rgba(0, 0, 0, .55) 48%, transparent 82%);
+}
+.hero-grain {
+  position: absolute;
+  inset: 0;
+  opacity: .34;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.08'/></svg>");
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+/* 顶栏在首页顶部变成透明玻璃；滚过首屏后再回到纸面玻璃 */
+body[data-page="home"] .topbar {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+body[data-page="home"] .topbar.is-stuck {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  backdrop-filter: blur(16px) saturate(1.6);
+  border-bottom-color: var(--line);
+  box-shadow: 0 10px 30px -22px rgba(3, 10, 18, .35);
+}
+body[data-page="home"] .topbar:not(.is-stuck) .brand { color: #F7F3E7; }
+body[data-page="home"] .topbar:not(.is-stuck) .brand sup { color: rgba(247, 243, 231, .5); }
+body[data-page="home"] .topbar:not(.is-stuck) .nav a,
+body[data-page="home"] .topbar:not(.is-stuck) .more-btn,
+body[data-page="home"] .topbar:not(.is-stuck) .icon-btn { color: rgba(236, 243, 250, .68); }
+body[data-page="home"] .topbar:not(.is-stuck) .nav a:hover,
+body[data-page="home"] .topbar:not(.is-stuck) .more-btn:hover,
+body[data-page="home"] .topbar:not(.is-stuck) .icon-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, .09);
+}
+body[data-page="home"] .topbar:not(.is-stuck) .nav a[aria-current="page"] {
+  color: #F8F3E4;
+  background: rgba(255, 255, 255, .13);
+}
+@media (max-width: 980px) {
+  .hero-stage { min-height: 500px; border-radius: 0 0 28px 28px; padding-bottom: 64px; }
+  .hero-stage .hero-title { max-width: 24ch; }
+  .hero-stage .hero-orb { display: none; }
 }
 
 main#main { position: relative; z-index: 1; }
