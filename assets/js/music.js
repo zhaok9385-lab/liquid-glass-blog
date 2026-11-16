@@ -96,6 +96,7 @@
     el.min.setAttribute('aria-label', min ? '展开播放器' : '收起播放器');
     el.min.title = min ? '展开播放器' : '收起播放器';
     el.art.setAttribute('aria-label', min ? '展开播放器' : (ap.audio.paused ? '播放' : '暂停'));
+    el.art.title = min ? '展开播放器' : '';
     if (min) {
       el.list.hidden = true;
       el.listBtn.setAttribute('aria-expanded', 'false');
