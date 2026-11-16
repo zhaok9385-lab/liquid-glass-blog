@@ -1858,7 +1858,7 @@ body.is-cover .nav-drawer { display: none !important; }
   left: 24px;
   bottom: 24px;
   z-index: 82;
-  width: min(372px, calc(100vw - 40px));
+  width: min(372px, calc(100vw - 48px));
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr) auto;
   align-items: center;
@@ -2064,7 +2064,7 @@ body.is-cover .music-dock { display: none; }
 .mc-toast {
   position: fixed;
   left: 24px;
-  bottom: 92px;
+  bottom: 112px;
   z-index: 90;
   max-width: min(360px, calc(100vw - 48px));
   padding: 8px 14px;
@@ -2103,7 +2103,7 @@ body.is-cover .music-dock { display: none; }
   .md-play { width: 31px; height: 31px; }
   .md-btn { width: 26px; height: 26px; }
   .md-btn svg { width: 13px; height: 13px; }
-  .mc-toast { left: 12px; bottom: 84px; }
+  .mc-toast { left: 12px; bottom: 104px; }
 }
 
 /* ============================================================
