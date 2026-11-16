@@ -1842,6 +1842,41 @@ input[type="range"]::-moz-range-thumb {
   filter: blur(56px);
   will-change: transform;
 }
+/* 首页专属：两条慢慢横穿顶部的极光光幕，不依赖鼠标 */
+.air-curtain {
+  display: none;
+  position: absolute;
+  left: -16%;
+  width: 132%;
+  height: 42vh;
+  filter: blur(46px) saturate(1.16);
+  opacity: .5;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.air-curtain.k1 {
+  top: -6vh;
+  background: linear-gradient(104deg,
+    transparent 5%,
+    rgba(var(--sky-a), .20) 26%,
+    rgba(var(--sky-b), .28) 48%,
+    rgba(var(--sky-c), .20) 68%,
+    transparent 92%);
+}
+.air-curtain.k2 {
+  top: 4vh;
+  height: 34vh;
+  background: linear-gradient(78deg,
+    transparent 10%,
+    rgba(var(--sky-c), .18) 32%,
+    rgba(var(--sky-b), .24) 54%,
+    rgba(var(--sky-a), .18) 74%,
+    transparent 94%);
+}
+body[data-page="home"] .air-curtain { display: block; }
+@media (max-width: 620px) {
+  body[data-page="home"] .air-curtain { display: none; }
+}
 .air-blob.a {
   width: 64vw; height: 64vw;
   left: -18vw; top: -16vh;
@@ -1973,8 +2008,22 @@ body[data-time="night"] .air-blob.c { background: radial-gradient(circle, rgba(7
         rgba(var(--sky-a), .72));
     box-shadow: 0 0 80px 16px rgba(var(--sky-b), .22);
     filter: saturate(1.1);
-    animation: orbSpin 120s linear infinite;
+    animation: orbSpin 120s linear infinite, orbFloat 9s ease-in-out infinite alternate;
     z-index: -1;
+  }
+  /* 轨道上慢慢绕行的一颗小光点 */
+  .hero-orb::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 50%;
+    background: rgba(var(--sky-b), .95);
+    box-shadow: 0 0 0 4px rgba(var(--sky-b), .12), 0 0 20px rgba(var(--sky-b), .72);
+    animation: ringOrbit 16s linear infinite;
   }
   .hero-orb::after {
     content: "";
@@ -1983,6 +2032,7 @@ body[data-time="night"] .air-blob.c { background: radial-gradient(circle, rgba(7
     border-radius: 50%;
     border: 1px solid var(--line-strong);
     opacity: .42;
+    animation: ringPulse 7s ease-in-out infinite alternate;
   }
   /* 内容页页头右侧的同心轨道：和首页光球同一套语言，但更克制 */
   .page-head::after {
@@ -2039,19 +2089,41 @@ main#main { position: relative; z-index: 1; }
 /* 底部留出音乐胶囊的位置，最后一屏不会被挡住 */
 body:not(.is-cover) { padding-bottom: 92px; }
 
-/* 首页动起来：极光呼吸、光带转向、三团光漂移 */
+/* 首页动起来：极光呼吸、光带转向、三团光漂移，外加两条自走光幕 */
 @keyframes auroraBreathe {
-  0%   { opacity: .78; transform: translateZ(0) scale(1.03); }
-  100% { opacity: 1; transform: translateZ(0) scale(1.08); }
+  0%   { opacity: .70; transform: translateZ(0) scale(1.02); }
+  100% { opacity: 1; transform: translateZ(0) scale(1.10); }
 }
 @keyframes auroraTurn {
-  0%   { transform: rotate(-10deg) scale(1.12); }
-  50%  { transform: rotate(4deg) scale(1.18); }
-  100% { transform: rotate(-10deg) scale(1.12); }
+  0%   { transform: rotate(-11deg) scale(1.12); }
+  50%  { transform: rotate(7deg) scale(1.20); }
+  100% { transform: rotate(-11deg) scale(1.12); }
+}
+@keyframes curtainDrift {
+  0%   { transform: translate3d(-8%, 0, 0) skewY(-2.4deg) scaleY(1.02); opacity: .30; }
+  50%  { transform: translate3d(8%, 2vh, 0) skewY(1.8deg) scaleY(1.18); opacity: .68; }
+  100% { transform: translate3d(-8%, 0, 0) skewY(-2.4deg) scaleY(1.02); opacity: .30; }
+}
+@keyframes curtainDriftBack {
+  0%   { transform: translate3d(7%, 1vh, 0) skewY(1.8deg) scaleY(1.06); opacity: .24; }
+  50%  { transform: translate3d(-8%, -1vh, 0) skewY(-2.4deg) scaleY(1.14); opacity: .60; }
+  100% { transform: translate3d(7%, 1vh, 0) skewY(1.8deg) scaleY(1.06); opacity: .24; }
 }
 @keyframes orbSpin {
   from { transform: translateY(-50%) rotate(0deg); }
   to   { transform: translateY(-50%) rotate(360deg); }
+}
+@keyframes orbFloat {
+  0%   { translate: 0 -5px; }
+  100% { translate: 0 9px; }
+}
+@keyframes ringPulse {
+  0%   { opacity: .30; }
+  100% { opacity: .58; }
+}
+@keyframes ringOrbit {
+  from { transform: rotate(0deg) translateX(146px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(146px) rotate(-360deg); }
 }
 @keyframes airDriftA {
   0%   { transform: translate3d(0, 0, 0) scale(1); }
@@ -2068,11 +2140,13 @@ body:not(.is-cover) { padding-bottom: 92px; }
   50%  { transform: translate3d(5vw, -7vh, 0) scale(1.1); }
   100% { transform: translate3d(-4vw, -2vh, 0) scale(1); }
 }
-body[data-page="home"] .air-bg::before { animation: auroraBreathe 16s var(--ease) infinite alternate; }
-body[data-page="home"] .air-bg::after { animation: auroraTurn 34s var(--ease) infinite alternate; }
-body[data-page="home"] .air-blob.a { animation: airDriftA 26s var(--ease) infinite alternate; }
-body[data-page="home"] .air-blob.b { animation: airDriftB 34s var(--ease) infinite alternate; }
-body[data-page="home"] .air-blob.c { animation: airDriftC 30s var(--ease) infinite alternate; }
+body[data-page="home"] .air-bg::before { animation: auroraBreathe 10s var(--ease) infinite alternate; }
+body[data-page="home"] .air-bg::after { animation: auroraTurn 16s var(--ease) infinite alternate; }
+body[data-page="home"] .air-curtain.k1 { animation: curtainDrift 14s var(--ease) infinite; }
+body[data-page="home"] .air-curtain.k2 { animation: curtainDriftBack 20s var(--ease) infinite; }
+body[data-page="home"] .air-blob.a { animation: airDriftA 18s var(--ease) infinite alternate; }
+body[data-page="home"] .air-blob.b { animation: airDriftB 24s var(--ease) infinite alternate; }
+body[data-page="home"] .air-blob.c { animation: airDriftC 21s var(--ease) infinite alternate; }
 
 /* 内容页也保留极慢的呼吸，不至于像一张白纸 */
 body:not(.is-cover):not([data-page="home"]) .air-blob.a { animation: airDriftA 42s var(--ease) infinite alternate; }

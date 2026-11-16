@@ -365,6 +365,7 @@ liquid-glass-blog/
 2. **按时间切换的背景** → 在 `chrome.js` 里按本地小时分四段：05–08 黎明、08–16 白天、16–19 黄昏、19–05 夜晚，每 10 分钟和页面重新可见时刷新 `body[data-time]`；CSS 用 `--sky-a/b/c` 驱动顶部极光、锥形光带和首页光球。首页右侧改成有清晰边缘的圆盘：白天是暖黄太阳、黄昏是橙日、夜里是带陨石坑的冷白月亮，外圈仍是 292px 轨道；夜里三团空气光也统一压到靛蓝/青灰，避免上下半页不同季。封面照片不参与时间调色，保留晨昏云海本身。
 3. **线上参考** → localghost 的《Time-based background colour transitions with Temporal and CSS color-mix》用时间段切色（https://localghost.dev/blog/time-based-background-colour-transitions-with-temporal-and-css-color-mix/）；npm `dynamic-sky`（https://www.npmjs.com/package/dynamic-sky）与 `horizon-sky`（https://www.npmjs.com/package/horizon-sky）用时间与经纬度算天空渐变；GitHub 上的 Chronos（http://raw.githubusercontent.com/sajarin/prismorphism/HEAD/CHRONOS.md）把日出、正午、黄昏、夜里的色写成 `--chronos-*` 变量。这里没有引入依赖，只取“按时间切一组 CSS 变量”的方法，保持纯静态。
 4. **预览方式** → 正常打开按本地时间自动判断；调试时可加 `?time=dawn|day|dusk|night`，例如 `/home.html?time=night`。
+5. **不碰鼠标也动** → 首页新增两条 `air-curtain` 光幕，14s/20s 各自横穿并压扁拉伸；极光呼吸压到 10s、锥形光带 16s 转向、三团空气光 18–24s 漂移；首页太阳/月亮用 `translate` 单独做 9s 上下浮动，外圈再加一颗 16s 绕轨道运行的小光点与 7s 明暗呼吸的轨道线。这些全部是 CSS 动画，不依赖 `pointermove`；原先跟随鼠标的 `air-spot` 降级为额外的一层，不动鼠标也有完整动效。
 
 **验证**
 - 21:00 本地打开首页 → `data-time=night`，右侧是冷白月亮，顶部靛蓝、底部冷灰，播放器仍是深色玻璃。
