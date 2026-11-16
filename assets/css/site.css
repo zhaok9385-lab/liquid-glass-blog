@@ -446,7 +446,7 @@ body.is-cover { overflow: hidden; height: 100vh; }
 .cover-sheen {
   position: absolute;
   top: -25%; bottom: -25%;
-  left: -45vw;
+  left: -48vw;
   width: 42vw;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .30), rgba(255, 255, 255, 0));
   filter: blur(26px);
@@ -454,9 +454,9 @@ body.is-cover { overflow: hidden; height: 100vh; }
   animation: coverSheen 27s ease-in-out infinite;
 }
 @keyframes coverSheen {
-  0%   { left: -48vw; opacity: .35; }
+  0%   { transform: skewX(-14deg) translateX(0); opacity: .35; }
   45%  { opacity: .75; }
-  100% { left: 118vw; opacity: .35; }
+  100% { transform: skewX(-14deg) translateX(166vw); opacity: .35; }
 }
 .cover-haze {
   position: absolute;
