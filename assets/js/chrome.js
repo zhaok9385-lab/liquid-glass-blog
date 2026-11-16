@@ -105,28 +105,7 @@
     }, { passive: true });
   }
 
-  /* ---------- 桌面端竖排页码 ---------- */
-  const RAILS = {
-    home: ['01', '博客 · INDEX'], photos: ['02', '相册 · PHOTOS'],
-    books: ['03', '书架 · SHELF'], notes: ['04', '碎片 · NOTES'],
-    archive: ['05', '归档 · ARCHIVE'], messages: ['06', '留言 · GUESTBOOK'],
-    lab: ['07', '实验室 · LAB'], about: ['08', '关于 · ABOUT'],
-    post: ['09', '文章 · ESSAY'],
-  };
-  const folio = document.createElement('aside');
-  folio.className = 'folio-rail';
-  folio.id = 'folio-rail';
-  folio.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(folio);
-  function updateFolio(page) {
-    const hit = RAILS[page];
-    if (!hit) { folio.hidden = true; return; }
-    folio.hidden = false;
-    folio.innerHTML = '<span class="folio-num">' + hit[0] + '</span>' +
-      '<span class="folio-line"></span>' +
-      '<span class="folio-label">' + hit[1] + '</span>';
-  }
-  updateFolio(document.body.dataset.page);
+  /* ---------- 导出 ---------- */
 
   /* ---------- 页脚 ---------- */
   const footer = document.createElement('footer');
@@ -326,7 +305,6 @@
     }
   });
 
-  /* ---------- 导出 ---------- */
   function setCurrent(file) {
     const norm = (s) => String(s || '').toLowerCase().replace(/\.html$/, '').replace(/^index$/, 'cover');
     current = norm(file);
@@ -341,7 +319,6 @@
     mark(header);
     mark(drawer);
     document.body.classList.toggle('is-cover', current === 'cover');
-    updateFolio(document.body.dataset.page || current);
   }
 
   window.Site = { toast, setTheme, openPalette, closePalette, setCurrent, closeDrawer };

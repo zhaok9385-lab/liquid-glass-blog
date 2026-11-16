@@ -106,6 +106,20 @@
       el.listBtn.setAttribute('aria-expanded', 'false');
     }
     try { localStorage.setItem(MINK, min ? '1' : ''); } catch (e) { }
+
+    // 某些内嵌浏览器会把 CSS 过渡的时钟冻住，导致一直停在半收起的胶囊上。
+    // 0.52s 后如果还没到达目标形态，就直接锁到终点，保证它一定是一枚圆唱片。
+    clearTimeout(dock.__minTimer);
+    dock.__minTimer = setTimeout(() => {
+      if (dock.classList.contains('is-min') !== min) return;
+      const w = dock.getBoundingClientRect().width;
+      const op = parseFloat(getComputedStyle(el.body).opacity);
+      const done = min ? (w <= 72 && op < .1) : (w >= Math.min(300, window.innerWidth - 80) && op > .9);
+      if (!done) {
+        dock.classList.add('is-locked');
+        setTimeout(() => dock.classList.remove('is-locked'), 600);
+      }
+    }, 520);
   }
   el.min.addEventListener('click', (e) => {
     e.stopPropagation();
