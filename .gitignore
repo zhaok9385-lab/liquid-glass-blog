@@ -7,3 +7,6 @@ repair/
 .idea/
 Thumbs.db
 desktop.ini
+
+# 旧版文件备份（仅本地保留，不入库）
+_backup/
