@@ -444,7 +444,7 @@ body.is-cover { overflow: hidden; height: 100vh; }
   font-size: 12px;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--text-2);
 }
 
 .cover-poem { margin: 0; }
@@ -472,7 +472,7 @@ body.is-cover { overflow: hidden; height: 100vh; }
   display: block;
   margin-top: 14px;
   font-size: 13px;
-  color: var(--text-3);
+  color: var(--text-2);
   letter-spacing: .04em;
 }
 
@@ -557,27 +557,6 @@ body.is-cover { overflow: hidden; height: 100vh; }
 .cover-music:hover { color: var(--text); background: var(--surface-2); }
 .cover-music svg { width: 20px; height: 20px; }
 .cover-music.playing { color: var(--accent); }
-
-.cover-scroll {
-  position: absolute;
-  left: 50%;
-  bottom: 88px;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  letter-spacing: .12em;
-  color: var(--text-3);
-  text-transform: uppercase;
-}
-.cover-scroll::after {
-  content: "";
-  width: 1px;
-  height: 28px;
-  background: linear-gradient(180deg, var(--line-strong), transparent);
-}
 
 /* ---------- 7. 首页 Hero ---------- */
 .hero {
@@ -1816,7 +1795,6 @@ body.is-cover .cover-music {
   .cover-inner { padding: 0 24px; }
   .cover-stats { gap: 10px; padding: 8px 14px; font-size: 12px; bottom: 24px; }
   .cover-music { left: 16px; right: auto; bottom: 20px; }
-  .cover-scroll { display: none; }
   .article-title { font-size: 26px; }
   .prose { font-size: 16.5px; }
   .prevnext { grid-template-columns: 1fr; }
@@ -1865,7 +1843,7 @@ body.is-cover .cover-music {
 
 /* ---------- 27. 打印 ---------- */
 @media print {
-  .topbar, .footer, .toc, #aplayer-mount, .cover-scroll { display: none !important; }
+  .topbar, .footer, .toc, #aplayer-mount { display: none !important; }
   body { background: #fff; color: #000; }
   .article-layout { display: block; }
   .prose { max-width: none; font-size: 12pt; }
