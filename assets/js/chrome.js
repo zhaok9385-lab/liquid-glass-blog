@@ -32,15 +32,21 @@
     return 'night';
   }
   function applyTimePhase() {
+    const now = new Date();
+    const hour = now.getHours() + now.getMinutes() / 60;
     const forced = new URLSearchParams(location.search).get('time');
-    const phase = TIME_LABEL[forced] ? forced : phaseForHour(new Date().getHours());
+    const phase = TIME_LABEL[forced] ? forced : phaseForHour(Math.floor(hour));
     document.body.dataset.time = phase;
     document.body.dataset.timeLabel = TIME_LABEL[phase];
+    /* 连续的小幅色相偏移：每过一小时，极光颜色都会缓慢挪一点 */
+    document.body.style.setProperty('--time-hue', ((hour - 12) * 4).toFixed(1) + 'deg');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
     const note = document.querySelector('#time-phase');
-    if (note) note.textContent = '现在 · ' + TIME_LABEL[phase];
+    if (note) note.textContent = '现在 · ' + TIME_LABEL[phase] + ' · ' + hh + ':' + mm;
   }
   applyTimePhase();
-  setInterval(applyTimePhase, 10 * 60 * 1000);
+  setInterval(applyTimePhase, 60 * 1000);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) applyTimePhase();
   });

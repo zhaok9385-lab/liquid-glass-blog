@@ -2173,6 +2173,17 @@ body[data-time="dusk"] .hero-stage {
   opacity: .9;
   box-shadow: 0 0 9px rgba(var(--aur-a), .75);
 }
+.hero-stage .hero-meta > span:last-child {
+  padding: 6px 11px;
+  margin: -6px 0;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  color: #F7EFDD;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+}
 /* 轨道上的日月：在深色底上放大一点，给足光晕 */
 .hero-stage .hero-orb {
   right: 48px;
@@ -2189,13 +2200,43 @@ body[data-time="dusk"] .hero-stage {
   background: rgba(255, 255, 255, .92);
   box-shadow: 0 0 0 4px rgba(255, 255, 255, .10), 0 0 24px rgba(var(--aur-c), .85);
 }
+/* 一条按 Aceternity Aurora 思路做的连续流场：背景位置从 50% 走到 350% */
+.hero-aurora-flow {
+  position: absolute;
+  inset: -24% -30%;
+  background-image:
+    repeating-linear-gradient(100deg,
+      rgba(var(--aur-a), 0) 0%,
+      rgba(var(--aur-a), .11) 8%,
+      rgba(var(--aur-b), .13) 16%,
+      rgba(var(--aur-a), 0) 23%,
+      rgba(var(--aur-c), .09) 31%,
+      rgba(var(--aur-b), 0) 40%),
+    repeating-linear-gradient(100deg,
+      rgba(var(--aur-b), 0) 0%,
+      rgba(var(--aur-b), .12) 11%,
+      rgba(var(--aur-c), .10) 21%,
+      rgba(var(--aur-b), 0) 32%);
+  background-size: 300% 200%, 200% 100%;
+  background-position: 50% 50%, 50% 50%;
+  filter: blur(24px) saturate(1.3) hue-rotate(var(--time-hue, 0deg));
+  mix-blend-mode: screen;
+  opacity: .46;
+  pointer-events: none;
+  will-change: background-position;
+  animation: auroraFlow 26s linear infinite;
+}
+@keyframes auroraFlow {
+  from { background-position: 50% 50%, 50% 50%; }
+  to   { background-position: 350% 50%, 350% 50%; }
+}
 /* 三条自走极光 */
 .hero-aurora {
   position: absolute;
   left: -18%;
   width: 136%;
   height: 64%;
-  filter: blur(48px) saturate(1.35);
+  filter: blur(48px) saturate(1.35) hue-rotate(var(--time-hue, 0deg));
   mix-blend-mode: screen;
   opacity: .62;
   pointer-events: none;
@@ -2218,7 +2259,7 @@ body[data-time="dusk"] .hero-stage {
 .hero-aurora.c {
   top: 24%;
   height: 44%;
-  filter: blur(30px) saturate(1.4);
+  filter: blur(30px) saturate(1.4) hue-rotate(var(--time-hue, 0deg));
   background: linear-gradient(100deg,
     transparent 8%,
     rgba(var(--aur-a), .20) 24%,
@@ -2316,6 +2357,114 @@ body[data-page="home"] .topbar:not(.is-stuck) .nav a[aria-current="page"] {
   .hero-stage { min-height: 500px; border-radius: 0 0 28px 28px; padding-bottom: 64px; }
   .hero-stage .hero-title { max-width: 24ch; }
   .hero-stage .hero-orb { display: none; }
+}
+
+/* ------------------------------------------------------------
+   内容页全页氛围：不再只给顶部一条颜色，整页都有纸面与色场
+   ------------------------------------------------------------ */
+html:not([data-theme="dark"]) body:not(.is-cover) {
+  background:
+    radial-gradient(48% 34% at 6% 2%, rgba(var(--wash-a), .24), transparent 68%),
+    radial-gradient(44% 30% at 94% 16%, rgba(var(--wash-b), .18), transparent 68%),
+    radial-gradient(54% 36% at 18% 66%, rgba(var(--wash-c), .17), transparent 66%),
+    radial-gradient(46% 32% at 88% 94%, rgba(var(--wash-a), .13), transparent 68%),
+    linear-gradient(180deg, #FCFBF7 0%, #F3F2EB 100%);
+  background-attachment: fixed;
+}
+body:not(.is-cover):not([data-page="home"]) .air-grid {
+  opacity: .32;
+  -webkit-mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, .55) 58%, transparent 100%);
+  mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, .55) 58%, transparent 100%);
+}
+body:not(.is-cover):not([data-page="home"]) .page-head,
+body[data-page="post"] .article-head { border-bottom-color: transparent; }
+/* 归档列表：从“纯文字分隔线”改成有厚度的玻璃纸片 */
+body[data-page="archive"] .tabs {
+  padding: 6px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .48);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow: 0 18px 40px -36px rgba(24, 36, 48, .28);
+}
+body[data-page="archive"] .year-block { margin-bottom: 28px; }
+body[data-page="archive"] .year-head { padding: 8px 4px 12px; border-bottom: 0; }
+body[data-page="archive"] .year-row {
+  padding: 18px 22px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .54);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow: 0 20px 44px -38px rgba(24, 36, 48, .30), inset 0 1px 0 rgba(255, 255, 255, .9);
+  transition: background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+body[data-page="archive"] .year-row:hover {
+  background: rgba(255, 255, 255, .74);
+  transform: translateY(-1px);
+}
+body[data-page="notes"] .note {
+  padding: 20px 22px;
+  margin-bottom: 9px;
+  border: 1px solid rgba(255, 255, 255, .70);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .50);
+  -webkit-backdrop-filter: blur(15px) saturate(1.2);
+  backdrop-filter: blur(15px) saturate(1.2);
+  box-shadow: 0 18px 40px -38px rgba(24, 36, 48, .26);
+}
+body[data-page="books"] .book-row {
+  padding: 22px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, .70);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .52);
+  -webkit-backdrop-filter: blur(15px) saturate(1.2);
+  backdrop-filter: blur(15px) saturate(1.2);
+  box-shadow: 0 18px 40px -38px rgba(24, 36, 48, .26);
+}
+body[data-page="photos"] .album-bar {
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255, 255, 255, .70);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .46);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+}
+/* 文章正文：一整块玻璃阅读纸，铺在整页色场上 */
+body[data-page="post"] .prose {
+  padding: 40px 42px 46px;
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, .62);
+  -webkit-backdrop-filter: blur(20px) saturate(1.28);
+  backdrop-filter: blur(20px) saturate(1.28);
+  box-shadow: 0 34px 80px -52px rgba(24, 36, 48, .38), inset 0 1px 0 rgba(255, 255, 255, .95);
+}
+body[data-page="post"] .toc {
+  padding: 16px 14px;
+  border: 1px solid rgba(255, 255, 255, .62);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .42);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+[data-theme="dark"] body[data-page="post"] .prose {
+  border-color: rgba(255, 255, 255, .10);
+  background: rgba(19, 23, 29, .72);
+  box-shadow: 0 34px 80px -52px rgba(0, 0, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+[data-theme="dark"] body[data-page="post"] .toc {
+  border-color: rgba(255, 255, 255, .10);
+  background: rgba(19, 23, 29, .56);
+}
+@media (max-width: 760px) {
+  body[data-page="post"] .prose { padding: 26px 22px 32px; border-radius: 20px; }
+  body[data-page="archive"] .year-row { padding: 16px 14px; border-radius: 14px; }
 }
 
 main#main { position: relative; z-index: 1; }
