@@ -87,6 +87,8 @@
     listBtn: dock.querySelector('#md-list-btn'),
     list: dock.querySelector('#md-list'),
     min: dock.querySelector('#md-min'),
+    body: dock.querySelector('.md-body'),
+    ctrl: dock.querySelector('.md-ctrl'),
   };
 
   /* ---------- 收起 / 展开：收成一个唱片圆钮 ---------- */
@@ -97,6 +99,8 @@
     el.min.title = min ? '展开播放器' : '收起播放器';
     el.art.setAttribute('aria-label', min ? '展开播放器' : (ap.audio.paused ? '播放' : '暂停'));
     el.art.title = min ? '展开播放器' : '';
+    el.body.inert = min;
+    el.ctrl.inert = min;
     if (min) {
       el.list.hidden = true;
       el.listBtn.setAttribute('aria-expanded', 'false');

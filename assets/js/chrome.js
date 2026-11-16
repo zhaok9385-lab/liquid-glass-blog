@@ -66,6 +66,68 @@
   air.innerHTML = '<span class="air-blob a"></span><span class="air-blob b"></span><span class="air-blob c"></span><span class="air-grid"></span><span class="air-grain"></span>';
   document.body.insertAdjacentElement('afterbegin', air);
 
+  /* ---------- 跟随指针的一束光（桌面端） ---------- */
+  const fine = window.matchMedia('(pointer: fine)').matches;
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (fine && !calm && !window.__airSpotBound) {
+    window.__airSpotBound = true;
+    const spot = document.createElement('span');
+    spot.className = 'air-spot';
+    air.appendChild(spot);
+    let tx = window.innerWidth / 2, ty = window.innerHeight * .38;
+    let x = tx, y = ty, raf = 0;
+    const tick = () => {
+      x += (tx - x) * .12;
+      y += (ty - y) * .12;
+      spot.style.setProperty('--sx', x.toFixed(1) + 'px');
+      spot.style.setProperty('--sy', y.toFixed(1) + 'px');
+      raf = (Math.abs(tx - x) > .4 || Math.abs(ty - y) > .4) ? requestAnimationFrame(tick) : 0;
+    };
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      tx = e.clientX; ty = e.clientY;
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, { passive: true });
+    tick();
+  }
+
+  /* ---------- 封面照片随指针轻微位移 ---------- */
+  if (fine && !calm && !window.__coverParallax) {
+    window.__coverParallax = true;
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const media = document.querySelector('.cover-media');
+      if (!media) return;
+      const nx = e.clientX / window.innerWidth - .5;
+      const ny = e.clientY / window.innerHeight - .5;
+      media.style.setProperty('--par-x', (nx * -16).toFixed(1));
+      media.style.setProperty('--par-y', (ny * -12).toFixed(1));
+    }, { passive: true });
+  }
+
+  /* ---------- 桌面端竖排页码 ---------- */
+  const RAILS = {
+    home: ['01', '博客 · INDEX'], photos: ['02', '相册 · PHOTOS'],
+    books: ['03', '书架 · SHELF'], notes: ['04', '碎片 · NOTES'],
+    archive: ['05', '归档 · ARCHIVE'], messages: ['06', '留言 · GUESTBOOK'],
+    lab: ['07', '实验室 · LAB'], about: ['08', '关于 · ABOUT'],
+    post: ['09', '文章 · ESSAY'],
+  };
+  const folio = document.createElement('aside');
+  folio.className = 'folio-rail';
+  folio.id = 'folio-rail';
+  folio.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(folio);
+  function updateFolio(page) {
+    const hit = RAILS[page];
+    if (!hit) { folio.hidden = true; return; }
+    folio.hidden = false;
+    folio.innerHTML = '<span class="folio-num">' + hit[0] + '</span>' +
+      '<span class="folio-line"></span>' +
+      '<span class="folio-label">' + hit[1] + '</span>';
+  }
+  updateFolio(document.body.dataset.page);
+
   /* ---------- 页脚 ---------- */
   const footer = document.createElement('footer');
   footer.className = 'footer';
@@ -279,6 +341,7 @@
     mark(header);
     mark(drawer);
     document.body.classList.toggle('is-cover', current === 'cover');
+    updateFolio(document.body.dataset.page || current);
   }
 
   window.Site = { toast, setTheme, openPalette, closePalette, setCurrent, closeDrawer };
