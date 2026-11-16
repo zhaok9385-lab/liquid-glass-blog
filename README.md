@@ -1,122 +1,82 @@
-# LIQUID·GLASS —— 液态玻璃个人博客
+# Tom · 一个人的小屋
 
-> 以玻璃，折射思想。Refract your thoughts through liquid glass.
+> 写代码、做设计、留一点光。
 
-一个零依赖、零构建、零图片的液态玻璃（Liquid Glass）风格个人博客。
-极光来自一段 WebGL 着色器，玻璃来自一段 CSS，所有视觉都是实时计算的。
-
-![tech](https://img.shields.io/badge/依赖-0-brightgreen) ![size](https://img.shields.io/badge/体积-~50KB_JS+CSS-blue) ![build](https://img.shields.io/badge/构建-不需要-orange)
+明亮通透的个人博客：纯静态 HTML + 原生 JS，零构建、零依赖、零追踪。
+视觉语言是 **Bright Air（明亮通透玻璃）** —— 玻璃只出现在顶栏与封面，正文永远落在实底上。
 
 ---
 
-## ✨ 亮点
+## 页面
 
-| 技术 | 说明 |
+| 文件 | 作用 |
 | --- | --- |
-| **WebGL 极光背景** | 域扭曲 fBm（Domain Warping）着色器；鼠标辉光、滚动视差、明暗主题色温同步渐变 |
-| **液态玻璃配方** | `backdrop-filter` 多层内阴影高光 + 增饱和，边缘 specular 勾勒玻璃厚度 |
-| **真折射透镜** | `feTurbulence + feDisplacementMap` SVG 位移贴图参与 `backdrop-filter`（Chromium），其他浏览器优雅降级为普通模糊 |
-| **玻璃光标** | 实心光点 + 弹簧插值玻璃圆环，悬停交互元素时膨胀 |
-| **磁吸按钮 / 倾斜卡片** | 指针感应区平移、`rotateX/Y` 3D 倾斜、`--mx/--my` 驱动的扫光 |
-| **明暗双主题** | 一键切换（快捷键 `T`），着色器色温与 CSS 令牌同步过渡；localStorage 记忆 |
-| **阅读体验** | 顶部阅读进度条、粘性 TOC 高亮联动、mac 风格代码块 + 一键复制、上/下一篇 |
-| **归档与标签** | 时间线归档、按标签聚合浏览；⌘K / Ctrl+K 命令面板全站跳转（`/` 也可呼出） |
-| **碎片与书单** | 短笔记流、阅读清单（状态/星级筛选）、Now / Uses / Projects 关于页 |
-| **玻璃实验室** | `/lab` 实时调节模糊、饱和、透明度、圆角、色相与高光，一键复制 CSS |
-| **订阅与评论** | 真实 RSS / JSON Feed；Giscus（GitHub Discussions）评论，未配置时优雅回退到留言板 |
-| **工程细节** | `prefers-reduced-motion` 全面适配、WebGL 不可用静态兜底、页面隐藏时暂停渲染、低分辨率渲染省电 |
+| `index.html` | 封面：全屏诗句 + 山雾照片 + 统计条 + 音乐音符 |
+| `home.html` | 首页：自我介绍、3 篇精选、全部文章（标签筛选 / 关键词搜索） |
+| `post.html` | 文章页（`?id=xxx`）：720px 版心、粘性目录、阅读进度、代码复制、上下篇 |
+| `archive.html` | 归档：时间线 / 按标签两个视图同页切换 |
+| `notes.html` | 碎片：按年份归拢的短笔记 |
+| `books.html` | 书架：按状态筛选，封面 + 一句短评 |
+| `photos.html` | 相册：三列栅格 + 键盘可用的灯箱 |
+| `messages.html` | 留言：localStorage 本机存储，带校验与快捷键发送 |
+| `about.html` | 关于：现在 / 工具 / 在做的东西 / 联系 |
+| `lab.html` | 实验室：可调参的玻璃，一键复制 CSS |
+| `tags.html` | 旧链接跳转页：`meta refresh` + `location.replace` 到归档 |
 
-## 📁 结构
+## 结构
 
 ```
-liquid-glass-blog/
-├── index.html          # 首页：风景 Hero / 数据条 / 资料栏 / 信息流 / 订阅
-├── home.html           # 博客列表（与首页信息流共用数据）
-├── post.html           # 文章页（?id=xxx 由 JS 渲染）
-├── photos.html         # 相册
-├── messages.html       # 留言板
-├── archive.html        # 归档：按年份的时间线
-├── tags.html           # 标签：按主题聚合（?tag=xxx）
-├── notes.html          # 碎片笔记
-├── books.html          # 书单
-├── about.html          # Now / Uses / Projects
-├── lab.html            # 玻璃参数实验室
-├── feed.xml / feed.json # RSS 2.0 与 JSON Feed
-├── favicon.svg
+.
+├── index.html … lab.html        # 10 个页面 + tags.html 跳转
+├── feed.xml / feed.json         # RSS 2.0 / JSON Feed
+├── favicon.svg, serve.py        # 图标、本地无缓存开发服务器
+├── docs/
+│   ├── design-inspiration-4.md  # 第四轮审美调研（GitHub 开源生态）
+│   └── new-site-plan.md         # 本次重构的方案与施工记录
 └── assets/
-    ├── css/style.css   # 液态玻璃设计系统（令牌 → 配方 → 组件）
-    ├── css/quiet-glass.css  # ★ Quiet Glass 静谧玻璃覆盖层（编辑式极简 × 克制玻璃）
-    ├── img/
-    │   ├── hero.jpg    # Hero 风景图（Unsplash 免费授权，可自行替换）
-    │   └── books/      # 书单封面（真实出版物封面，本地文件）
-    └── js/
-        ├── data.js     # ★ 所有内容与站点元信息（改这里即可换内容）
-        ├── shader.js   # WebGL 柔光着色器（页面底色）
-        ├── main.js     # 磁吸 / 倾斜 / 主题 / 揭示 / 信息流渲染 / 空间转场
-        ├── post.js     # 文章页渲染 / 进度 / TOC / 代码复制 / 评论
-        ├── extra.js    # 更多菜单 / 命令面板 / 归档 / 标签 / 笔记 / 书单 / 实验室
-        └── music.js    # APlayer 音乐卡片
+    ├── css/site.css             # 唯一样式表：令牌 → 基础 → 布局 → 组件（44.5 KB）
+    ├── js/data.js               # 内容源：SITE / TAGS / POSTS / PHOTOS / NOTES / BOOKS / ABOUT / GISCUS
+    ├── js/chrome.js             # 顶栏、页脚、主题、命令面板、抽屉菜单、Toast
+    ├── js/render.js             # 首页 / 归档 / 碎片 / 书架 / 相册 / 留言 / 关于 / 实验室渲染
+    ├── js/post.js               # 文章页：正文、目录高亮、进度、代码复制、评论位
+    ├── js/music.js              # APlayer 装配（保留原有播放逻辑与状态记忆）
+    ├── vendor/APlayer.*         # 本地内置播放器（MIT）
+    └── img/                     # hero / cover / p1–p6 / books/b1–b8
 ```
 
-## 🚀 运行
-
-任何静态服务器都可以（直接双击 index.html 也能打开，但推荐走 HTTP）：
+## 运行
 
 ```bash
-cd liquid-glass-blog
-python -m http.server 8123
-# 或 npx serve .
+python serve.py          # http://127.0.0.1:8123，带 no-cache 头
 ```
 
-打开 <http://127.0.0.1:8123>
+也可以 `python -m http.server 8123` 或任意静态服务器；不依赖网络（音乐封面除外）。
 
-## 🌍 部署
+## 设计系统要点
 
-纯静态目录，拖进 **GitHub Pages / Vercel / Netlify / Cloudflare Pages** 任一平台即可，无需任何配置。
+- **令牌**：浅色 `bg #FAFAF8 / text #17181A / accent #2F5D8A`；暗色 `#0F1115 / #E9EAEC / #8FB4DD`。
+- **字体**：系统字体栈（Inter / PingFang SC / HarmonyOS Sans SC），长标题用 Noto Serif SC / Georgia，数字与代码用 JetBrains Mono / Consolas。
+- **玻璃（唯一配方）**：`rgba(255,255,255,.74)` + `blur(16px) saturate(1.6)` + 发丝边 + 顶部内高光 + 两级阴影；带 `@supports not (backdrop-filter)` 实底回退与 `prefers-reduced-transparency` 分支。不做折射、不做 SVG 位移、不做着色器。
+- **动效**：hover 160ms / 展开 240ms / 抽屉 320ms，统一 `cubic-bezier(.2,.7,.3,1)`；只动 `transform` 与 `opacity`；`prefers-reduced-motion` 下只保留 80ms 变化。
+- **无障碍**：跳转链接、`aria-current`、`aria-pressed`、`aria-expanded`、可见 `:focus-visible`、表单错误文本、灯箱键盘左右切换、打印样式。
 
-## ✏️ 定制
+## 交互
 
-1. **换内容**：编辑 `assets/js/data.js` —— `SITE`（名字/邮箱/链接/订阅接口）、`TAGS`（标签色）、`POSTS`（文章，`content` 为 HTML 字符串，支持 h2/h3/p/ul/blockquote/pre）、`NOTES`（碎片笔记）、`BOOKS`（书单，含 ISBN / 出版社 / 页数 / 封面路径）、`ABOUT`（Now / Uses / Projects）。
-2. **换配色**：`assets/css/style.css` 顶部的 `:root` 令牌（`--accent` 三色系 + 玻璃透明度）；着色器色板在 `shader.js` 的 `FRAG` 中同步调整。
-3. **换玻璃手感**：`.glass` 的 `blur(22px) saturate(1.7)` 与五层内阴影是核心配方，动它之前先备份。
-4. **订阅**：在 `SITE.subscribeEndpoint` 填入 Buttondown / Formspree 等 POST 地址即可真实收集邮箱；留空则回退为 `mailto:` 邮件订阅。
-5. **评论**：在 `data.js` 的 `GISCUS` 中填入 GitHub 仓库与分类信息（见 <https://giscus.app>）；未配置时文章页展示引导卡片。
-6. **RSS**：`SITE.url` 换成部署域名后，记得同步 `feed.xml` / `feed.json` 中的绝对链接。
-7. **书单封面**：`BOOKS[].cover` 默认指向 `assets/img/books/b*.jpg`；换书时把封面图放进该目录并更新 `cover`、`isbn`、`link` 即可，无需联网。
+- `Ctrl/⌘ + K` 或 `/`：全站命令面板（文章 / 页面 / 碎片 / 书），`#search` 深链可直接打开。
+- `T`：切换明暗；状态写在 localStorage 的 `lg-theme`，各页 `<head>` 内置预置脚本防闪烁。
+- 移动端：导航收进抽屉，点顶栏左侧按钮展开；2 列布局。
+- 音乐：APlayer 固定右下角（收起为圆形唱片），会话内记忆曲目与进度（`lg-music-state`）；封面页只留左下音符按钮，避免遮挡诗句。
 
-## 🎨 Quiet Glass 视觉改造（2026-11）
+## 已知取舍
 
-在原有「全站液态玻璃」之上叠加了 **Quiet Glass · 静谧玻璃** 设计层（`assets/css/quiet-glass.css`，在 style.css 之后加载，以覆盖方式工作，不改原有组件逻辑）。
+- JS（不含 `data.js` 与 APlayer）实测约 **44 KB**，高于方案里 30 KB 的预算；原因是各页渲染集中在 `render.js`。gzip 后约 10 KB，作为纯静态站点可接受，记录在此而非隐瞒。
+- 旧版 `style.css` / `quiet-glass.css` / `main.js` / `extra.js` / `shader.js` 已移至 `_backup/old-glass/`（`.gitignore` 已忽略 `_backup/`），可随时取回。
+- 文章正文里原本把「极光背景」当现状描述，已按方案 A 改为记录口吻（仅动必要的几句）。
 
-设计方向：Editorial Minimalism × Liquid Glass × Natural Photography —— 玻璃只用于导航、播放器、搜索弹窗、悬浮控件；内容层保持轻盈纸面。
+## 部署
 
-| 维度 | 规范 |
-| --- | --- |
-| 页面背景 | `#F6F5F1`（暖白）/ 暗色 `#161B26` |
-| 主要文字 | `#202B45` 深蓝灰 |
-| 辅助文字 | `#858B98` |
-| 强调色 | `#8CA9C8` 低饱和浅蓝 |
-| 玻璃背景 | `rgba(255,255,255,.55)`，blur 18px |
-| 卡片圆角 | 18px（卡片）/ 22px（大面板） |
-| 标题 | 衬线（Georgia / Noto Serif SC），去蓝紫渐变 |
-| 正文行高 | 1.8 |
+纯静态目录，直接拖进 GitHub Pages / Vercel / Netlify / Cloudflare Pages 即可。仓库：<https://github.com/zhaok9385-lab/liquid-glass-blog>（私有）。
 
-主要改动：
-- 首页：诗句缩小降阴影、英文换衬线斜体、统计改轻量底栏、音乐播放器统一移至右下角悬浮控件。
-- 博客首页：标题改为「记录技术，探索设计，创造有趣的事物。」深蓝灰衬线，去掉蓝紫渐变；统计改轻量信息行；个人介绍/定位/按钮整合。
-- 文章列表：杂志式左右布局、18px 圆角、去厚重边框阴影、分类改纯文字标签、搜索框简化、侧栏个人介绍缩小。
-- 相册：图片为主角、去厚重卡片包裹。
-- 留言：内容优先，玻璃只用于输入框与交互控件。
-- 归档 / 标签 / 笔记 / 书单 / 关于 / 实验室统一轻量化。
+## 许可
 
-旧版文件备份在 `_backup/quiet-glass/`。
-
-## 🧪 兼容性
-
-- Chromium（Chrome / Edge）：完整体验，含 SVG 位移真折射透镜。
-- Firefox / Safari：SVG 折射降级为模糊，其余功能一致（自动检测）。
-- 触屏设备：自定义光标、磁吸、倾斜自动关闭；`prefers-reduced-motion` 用户获得静态极光。
-
-## 📄 许可
-
-仅供个人博客使用与魔改，随意取用。
+个人自用与魔改随意。

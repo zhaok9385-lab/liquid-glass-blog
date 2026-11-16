@@ -1,9 +1,9 @@
 {
   "version": "https://jsonfeed.org/version/1.1",
-  "title": "Tom · 液态玻璃博客",
+  "title": "Tom · 一个人的小屋",
   "home_page_url": "https://tom.gl/",
   "feed_url": "https://tom.gl/feed.json",
-  "description": "以玻璃，折射思想。WebGL、CSS 与界面动效的实验笔记。",
+  "description": "写代码、做设计、留一点光。明亮通透的个人站，纯静态。",
   "language": "zh-CN",
   "items": [
     {

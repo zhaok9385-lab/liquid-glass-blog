@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tom · 液态玻璃博客</title>
+    <title>Tom · 一个人的小屋</title>
     <link>https://tom.gl/</link>
-    <description>以玻璃，折射思想。WebGL、CSS 与界面动效的实验笔记。</description>
+    <description>写代码、做设计、留一点光。明亮通透的个人站，纯静态。</description>
     <language>zh-CN</language>
     <lastBuildDate>Tue, 20 Oct 2026 08:00:00 +0800</lastBuildDate>
     <atom:link href="https://tom.gl/feed.xml" rel="self" type="application/rss+xml"/>
