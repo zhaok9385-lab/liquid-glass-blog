@@ -63,7 +63,7 @@
   const air = document.createElement('div');
   air.className = 'air-bg';
   air.setAttribute('aria-hidden', 'true');
-  air.innerHTML = '<span class="air-blob a"></span><span class="air-blob b"></span><span class="air-blob c"></span><span class="air-grain"></span>';
+  air.innerHTML = '<span class="air-blob a"></span><span class="air-blob b"></span><span class="air-blob c"></span><span class="air-grid"></span><span class="air-grain"></span>';
   document.body.insertAdjacentElement('afterbegin', air);
 
   /* ---------- 页脚 ---------- */

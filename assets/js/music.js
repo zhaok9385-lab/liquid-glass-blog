@@ -67,7 +67,10 @@
       '<button class="md-btn" id="md-next" type="button" aria-label="下一首"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 5h2v14h-2zM5 5v14l9.5-7z"/></svg></button>' +
       '<button class="md-btn" id="md-list-btn" type="button" aria-label="播放列表" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M4 12h10M4 17h7"/><circle cx="18" cy="16.5" r="2"/><path d="M20 16.5V9l-3 .8"/></svg></button>' +
     '</div>' +
-    '<div class="md-list" id="md-list" hidden></div>';
+    '<div class="md-list" id="md-list" hidden></div>' +
+    '<button class="md-min" id="md-min" type="button" aria-label="收起播放器" title="收起播放器">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+    '</button>';
   document.body.appendChild(dock);
 
   const el = {
@@ -83,7 +86,29 @@
     next: dock.querySelector('#md-next'),
     listBtn: dock.querySelector('#md-list-btn'),
     list: dock.querySelector('#md-list'),
+    min: dock.querySelector('#md-min'),
   };
+
+  /* ---------- 收起 / 展开：收成一个唱片圆钮 ---------- */
+  const MINK = 'lg-music-min';
+  function setMin(min) {
+    dock.classList.toggle('is-min', min);
+    el.min.setAttribute('aria-label', min ? '展开播放器' : '收起播放器');
+    el.min.title = min ? '展开播放器' : '收起播放器';
+    el.art.setAttribute('aria-label', min ? '展开播放器' : (ap.audio.paused ? '播放' : '暂停'));
+    if (min) {
+      el.list.hidden = true;
+      el.listBtn.setAttribute('aria-expanded', 'false');
+    }
+    try { localStorage.setItem(MINK, min ? '1' : ''); } catch (e) { }
+  }
+  el.min.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setMin(!dock.classList.contains('is-min'));
+  });
+  dock.addEventListener('click', () => {
+    if (dock.classList.contains('is-min')) setMin(false);
+  });
 
   function current() { return songs[ap.list.index] || songs[0]; }
 
@@ -134,12 +159,15 @@
     dock.classList.toggle('playing', playing);
     el.play.classList.toggle('is-on', playing);
     el.play.setAttribute('aria-label', playing ? '暂停' : '播放');
-    el.art.setAttribute('aria-label', playing ? '暂停' : '播放');
+    if (!dock.classList.contains('is-min')) el.art.setAttribute('aria-label', playing ? '暂停' : '播放');
     if (playing) { cancelAnimationFrame(raf); syncProgress(); }
   }
 
   el.play.addEventListener('click', () => ap.toggle());
-  el.art.addEventListener('click', () => ap.toggle());
+  el.art.addEventListener('click', () => {
+    if (dock.classList.contains('is-min')) { setMin(false); return; }
+    ap.toggle();
+  });
   el.prev.addEventListener('click', () => ap.skipBack());
   el.next.addEventListener('click', () => ap.skipForward());
 
@@ -294,6 +322,7 @@
   syncMeta();
   syncPlaying();
   syncProgress();
+  try { if (localStorage.getItem(MINK) === '1') setMin(true); } catch (e) { }
 
   /* 自动播放：先试一次，被浏览器拦下就在第一次点击/按键时补上 */
   let autoPlaying = false;

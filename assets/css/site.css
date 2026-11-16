@@ -405,29 +405,107 @@ body.is-cover { overflow: hidden; height: 100vh; }
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: var(--surface-2);
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 82% 4%, #EDF3F7 0%, rgba(237, 243, 247, 0) 58%),
+    linear-gradient(164deg, #FDFAF3 0%, #F7EDDF 50%, #F0DFC8 100%);
 }
-.cover-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 42%;
-  filter: saturate(1.02) contrast(1.02);
+.cover-field {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  will-change: transform;
 }
-[data-theme="dark"] .cover-media img { filter: saturate(.9) brightness(.62); }
+.cover-field.a {
+  width: 76vw; height: 66vh;
+  left: -16vw; bottom: -20vh;
+  background: radial-gradient(circle at 50% 50%, rgba(231, 169, 128, .68), rgba(231, 169, 128, 0) 68%);
+  animation: coverFieldA 44s var(--ease) infinite alternate;
+}
+.cover-field.b {
+  width: 62vw; height: 62vh;
+  right: -14vw; top: -18vh;
+  background: radial-gradient(circle at 50% 50%, rgba(143, 176, 205, .62), rgba(143, 176, 205, 0) 68%);
+  animation: coverFieldB 52s var(--ease) infinite alternate;
+}
+.cover-field.c {
+  width: 52vw; height: 54vh;
+  left: 34vw; top: 30vh;
+  background: radial-gradient(circle at 50% 50%, rgba(188, 164, 190, .38), rgba(188, 164, 190, 0) 70%);
+  animation: coverFieldC 39s var(--ease) infinite alternate;
+}
+.cover-sun {
+  position: absolute;
+  left: 10vw; bottom: -16vh;
+  width: 52vw; height: 52vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 205, 148, .58) 0%, rgba(255, 199, 140, .22) 40%, rgba(255, 199, 140, 0) 66%);
+  filter: blur(8px);
+  animation: coverSun 11s ease-in-out infinite alternate;
+}
+.cover-sheen {
+  position: absolute;
+  top: -25%; bottom: -25%;
+  left: -45vw;
+  width: 42vw;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .30), rgba(255, 255, 255, 0));
+  filter: blur(26px);
+  transform: skewX(-14deg);
+  animation: coverSheen 27s ease-in-out infinite;
+}
+@keyframes coverSheen {
+  0%   { left: -48vw; opacity: .35; }
+  45%  { opacity: .75; }
+  100% { left: 118vw; opacity: .35; }
+}
+.cover-haze {
+  position: absolute;
+  left: -10%; right: -10%;
+  top: 62%; height: 26vh;
+  background: linear-gradient(180deg, rgba(255, 252, 246, 0) 0%, rgba(255, 252, 246, .34) 52%, rgba(255, 252, 246, 0) 100%);
+  filter: blur(28px);
+}
+.cover-horizon {
+  position: absolute;
+  left: 0; right: 0;
+  top: 73.5%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(126, 98, 74, 0) 0%, rgba(126, 98, 74, .16) 28%, rgba(126, 98, 74, .16) 72%, rgba(126, 98, 74, 0) 100%);
+}
+.cover-grain {
+  position: absolute;
+  inset: 0;
+  opacity: .55;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.05'/></svg>");
+  background-size: 160px 160px;
+}
+[data-theme="dark"] .cover-media {
+  background:
+    radial-gradient(120% 90% at 82% 4%, #1D2838 0%, rgba(29, 40, 56, 0) 58%),
+    linear-gradient(164deg, #121419 0%, #191B20 52%, #221E1B 100%);
+}
+[data-theme="dark"] .cover-field.a { background: radial-gradient(circle, rgba(148, 96, 68, .32), rgba(148, 96, 68, 0) 68%); }
+[data-theme="dark"] .cover-field.b { background: radial-gradient(circle, rgba(78, 112, 148, .34), rgba(78, 112, 148, 0) 68%); }
+[data-theme="dark"] .cover-field.c { background: radial-gradient(circle, rgba(120, 96, 128, .22), rgba(120, 96, 128, 0) 70%); }
+[data-theme="dark"] .cover-sun { background: radial-gradient(circle, rgba(226, 168, 112, .26), rgba(226, 168, 112, 0) 66%); }
+[data-theme="dark"] .cover-sheen { background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .09), rgba(255, 255, 255, 0)); }
+[data-theme="dark"] .cover-haze { background: linear-gradient(180deg, rgba(255, 240, 220, 0) 0%, rgba(255, 240, 220, .07) 52%, rgba(255, 240, 220, 0) 100%); }
+[data-theme="dark"] .cover-horizon { background: linear-gradient(90deg, rgba(255, 232, 206, 0) 0%, rgba(255, 232, 206, .10) 28%, rgba(255, 232, 206, .10) 72%, rgba(255, 232, 206, 0) 100%); }
+[data-theme="dark"] .cover-grain { mix-blend-mode: screen; opacity: .25; }
 
 .cover-veil {
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(120% 80% at 50% 16%, rgba(255, 255, 255, .16), transparent 62%),
-    linear-gradient(180deg, rgba(250, 250, 248, .32) 0%, rgba(250, 250, 248, .52) 42%, rgba(250, 250, 248, .86) 100%);
+    radial-gradient(62% 56% at 50% 41%, rgba(253, 250, 244, .60) 0%, rgba(253, 250, 244, .18) 56%, rgba(253, 250, 244, 0) 78%),
+    linear-gradient(180deg, rgba(253, 250, 244, .16) 0%, rgba(253, 250, 244, .05) 48%, rgba(248, 242, 234, .70) 100%);
 }
 [data-theme="dark"] .cover-veil {
   background:
-    radial-gradient(120% 80% at 50% 18%, rgba(143, 180, 221, .10), transparent 62%),
-    linear-gradient(180deg, rgba(15, 17, 21, .55) 0%, rgba(15, 17, 21, .78) 45%, rgba(15, 17, 21, .97) 100%);
+    radial-gradient(62% 56% at 50% 41%, rgba(18, 20, 24, .60) 0%, rgba(18, 20, 24, .22) 56%, rgba(18, 20, 24, 0) 78%),
+    linear-gradient(180deg, rgba(18, 20, 24, .30) 0%, rgba(18, 20, 24, .10) 48%, rgba(15, 17, 21, .82) 100%);
 }
 
 .cover-inner {
@@ -1278,6 +1356,14 @@ a.tag:hover { color: var(--accent); background: var(--accent-weak); }
   transition: opacity var(--t-base) var(--ease), visibility var(--t-base);
 }
 .lightbox.open { opacity: 1; visibility: visible; }
+/* 灯箱打开时，顶栏与播放器让位，避免压住大图顶部和关闭按钮 */
+body.lb-open .topbar,
+body.lb-open .music-dock,
+body.lb-open #aplayer-mount {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+body.lb-open .topbar { transition: opacity var(--t-fast) var(--ease); }
 .lightbox img {
   max-width: min(92vw, 1100px);
   max-height: 82vh;
@@ -1742,30 +1828,57 @@ input[type="range"]::-moz-range-thumb {
 .air-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(52px);
+  filter: blur(56px);
   will-change: transform;
 }
 .air-blob.a {
-  width: 62vw; height: 62vw;
+  width: 64vw; height: 64vw;
   left: -18vw; top: -16vh;
-  background: radial-gradient(circle at 50% 50%, rgba(47, 93, 138, .26), rgba(47, 93, 138, 0) 68%);
+  background: radial-gradient(circle at 50% 50%, rgba(var(--wash-a), .24), rgba(var(--wash-a), 0) 68%);
 }
 .air-blob.b {
-  width: 54vw; height: 54vw;
+  width: 56vw; height: 56vw;
   right: -16vw; top: 8vh;
-  background: radial-gradient(circle at 50% 50%, rgba(196, 162, 122, .30), rgba(196, 162, 122, 0) 66%);
+  background: radial-gradient(circle at 50% 50%, rgba(var(--wash-b), .28), rgba(var(--wash-b), 0) 66%);
 }
 .air-blob.c {
-  width: 50vw; height: 50vw;
+  width: 52vw; height: 52vw;
   left: 14vw; bottom: -26vh;
-  background: radial-gradient(circle at 50% 50%, rgba(104, 146, 130, .24), rgba(104, 146, 130, 0) 66%);
+  background: radial-gradient(circle at 50% 50%, rgba(var(--wash-c), .22), rgba(var(--wash-c), 0) 66%);
 }
+
+/* 每个模块有自己的空气颜色：书架偏赭、相册偏陶土、碎片偏紫…… */
+body { --wash-a: 47, 93, 138; --wash-b: 196, 162, 122; --wash-c: 104, 146, 130; }
+body[data-page="photos"] { --wash-a: 191, 134, 104; --wash-b: 116, 148, 172; --wash-c: 176, 158, 128; }
+body[data-page="books"] { --wash-a: 178, 142, 92; --wash-b: 96, 124, 112; --wash-c: 148, 126, 106; }
+body[data-page="archive"] { --wash-a: 104, 126, 158; --wash-b: 176, 156, 126; --wash-c: 118, 140, 132; }
+body[data-page="notes"] { --wash-a: 146, 124, 168; --wash-b: 118, 146, 158; --wash-c: 170, 150, 130; }
+body[data-page="messages"] { --wash-a: 92, 130, 168; --wash-b: 192, 150, 136; --wash-c: 120, 150, 148; }
+body[data-page="about"] { --wash-a: 172, 122, 120; --wash-b: 112, 138, 170; --wash-c: 150, 140, 118; }
+body[data-page="lab"] { --wash-a: 96, 146, 136; --wash-b: 172, 148, 104; --wash-c: 112, 132, 160; }
+body[data-page="post"] { --wash-a: 156, 128, 96; --wash-b: 108, 140, 166; --wash-c: 132, 148, 124; }
+
+/* 加号网格：Vercel / Linear 那种“工程纸”质感，只在页面顶部淡淡出现 */
+.air-grid {
+  position: absolute;
+  inset: 0;
+  opacity: .38;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><path d='M16 7v18M7 16h18' stroke='%2317181A' stroke-opacity='.14' stroke-width='1'/></svg>");
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(90% 72% at 50% 0%, #000 0%, rgba(0, 0, 0, .5) 46%, transparent 80%);
+  mask-image: radial-gradient(90% 72% at 50% 0%, #000 0%, rgba(0, 0, 0, .5) 46%, transparent 80%);
+}
+[data-theme="dark"] .air-grid {
+  opacity: .4;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><path d='M16 7v18M7 16h18' stroke='%23FFFFFF' stroke-opacity='.12' stroke-width='1'/></svg>");
+}
+
 [data-theme="dark"] .air-bg::before {
   background: radial-gradient(58% 62% at 50% 0%, rgba(143, 180, 221, .10), rgba(143, 180, 221, 0) 72%);
 }
-[data-theme="dark"] .air-blob.a { background: radial-gradient(circle, rgba(95, 136, 190, .22), rgba(95, 136, 190, 0) 68%); }
-[data-theme="dark"] .air-blob.b { background: radial-gradient(circle, rgba(150, 118, 92, .16), rgba(150, 118, 92, 0) 66%); }
-[data-theme="dark"] .air-blob.c { background: radial-gradient(circle, rgba(88, 132, 116, .16), rgba(88, 132, 116, 0) 66%); }
+[data-theme="dark"] .air-blob.a { background: radial-gradient(circle, rgba(var(--wash-a), .16), rgba(var(--wash-a), 0) 68%); }
+[data-theme="dark"] .air-blob.b { background: radial-gradient(circle, rgba(var(--wash-b), .14), rgba(var(--wash-b), 0) 66%); }
+[data-theme="dark"] .air-blob.c { background: radial-gradient(circle, rgba(var(--wash-c), .12), rgba(var(--wash-c), 0) 66%); }
 
 .air-grain {
   position: absolute;
@@ -1776,23 +1889,6 @@ input[type="range"]::-moz-range-thumb {
   mix-blend-mode: multiply;
 }
 [data-theme="dark"] .air-grain { mix-blend-mode: screen; opacity: .3; }
-
-/* 内容页加一层极淡的稿纸格线，像摊开的稿纸 */
-body:not(.is-cover):not([data-page="home"]) .air-grain::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(90deg, rgba(23, 24, 26, .028) 0 1px, transparent 1px 96px),
-    repeating-linear-gradient(0deg, rgba(23, 24, 26, .018) 0 1px, transparent 1px 96px);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .9), transparent 64%);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .9), transparent 64%);
-}
-[data-theme="dark"] body:not(.is-cover):not([data-page="home"]) .air-grain::after {
-  background-image:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 1px, transparent 1px 96px),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, .02) 0 1px, transparent 1px 96px);
-}
 
 main#main { position: relative; z-index: 1; }
 
@@ -1824,7 +1920,23 @@ body.is-cover #site-topbar,
 body.is-cover .footer,
 body.is-cover .nav-drawer { display: none !important; }
 
-/* 封面：一层极慢的呼吸光，照片不会显得死板 */
+/* 封面：一片会缓慢流动的晨昏色场，代替静态照片 */
+@keyframes coverFieldA {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(7vw, -5vh, 0) scale(1.12); }
+}
+@keyframes coverFieldB {
+  0%   { transform: translate3d(0, 0, 0) scale(1.04); }
+  100% { transform: translate3d(-6vw, 6vh, 0) scale(.94); }
+}
+@keyframes coverFieldC {
+  0%   { transform: translate3d(0, 0, 0) scale(.96); }
+  100% { transform: translate3d(4vw, 7vh, 0) scale(1.1); }
+}
+@keyframes coverSun {
+  0%   { transform: scale(1); opacity: .78; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
 .cover-veil::after {
   content: "";
   position: absolute;
@@ -2003,6 +2115,41 @@ body.is-cover .music-dock { display: none; }
 .md-play.is-on .i-play { display: none; }
 .md-play.is-on .i-pause { display: block; }
 
+/* 收起按钮：浮在胶囊上沿的小圆钮 */
+.md-min {
+  position: absolute;
+  top: -13px; right: 14px;
+  width: 24px; height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-1);
+  opacity: .78;
+  transition: opacity var(--t-fast), background var(--t-fast), color var(--t-fast), transform var(--t-fast);
+}
+.md-min:hover { opacity: 1; color: var(--text); transform: translateY(-1px); }
+.md-min svg { width: 13px; height: 13px; }
+
+/* 收起形态：只剩一张唱片 */
+.music-dock.is-min {
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.music-dock.is-min .md-body,
+.music-dock.is-min .md-ctrl,
+.music-dock.is-min .md-min { display: none; }
+.music-dock.is-min .md-art { width: 100%; height: 100%; box-shadow: none; }
+.music-dock.is-min .md-eq { display: none; }
+.music-dock.is-min .md-ring { inset: 5px; }
+
 .md-list {
   position: absolute;
   left: 0; right: 0;
@@ -2103,6 +2250,7 @@ body.is-cover .music-dock { display: none; }
   .md-play { width: 31px; height: 31px; }
   .md-btn { width: 26px; height: 26px; }
   .md-btn svg { width: 13px; height: 13px; }
+  .music-dock.is-min { left: 12px; right: auto; bottom: 12px; width: 58px; height: 58px; }
   .mc-toast { left: 12px; bottom: 104px; }
 }
 

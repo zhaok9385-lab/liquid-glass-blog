@@ -338,11 +338,13 @@
       }
       lb.classList.add('open');
       lb.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('lb-open');
     }
     function close() {
       lbState.open = false;
       lb.classList.remove('open');
       lb.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('lb-open');
     }
 
     grid.addEventListener('click', (e) => {
