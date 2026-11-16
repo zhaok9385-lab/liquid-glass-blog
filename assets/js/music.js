@@ -157,6 +157,7 @@
     ap.list.switch(i);
     syncMeta();
     ap.play();
+    saveState();
     el.list.hidden = true;
     el.listBtn.setAttribute('aria-expanded', 'false');
   });
@@ -226,6 +227,7 @@
   ap.on('play', saveState);
   ap.on('pause', saveState);
   window.addEventListener('beforeunload', saveState);
+  window.addEventListener('pagehide', saveState);
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
 
   /* ---------- 切歌提示 ---------- */
@@ -259,6 +261,7 @@
     ap[method] = function () {
       const r = orig();
       syncMeta();
+      saveState();
       toast(current().name);
       return r;
     };
